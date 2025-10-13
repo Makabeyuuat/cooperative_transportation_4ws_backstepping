@@ -9,6 +9,10 @@
 #define PSdist 400
 #define PAI 3.14159265358979323846
 #define LIM 1.48352986419518  //操舵角の上限（85度）
+#define vehicle_inertia_coef 0.04732
+#define wheel_inertia_coef 1.72425
+#define hinge_inertia_coef 2.58637
+#define carrier_inertia_coef 0.0487
 inline constexpr int BEZIER_ORDER = 3; 
 inline constexpr double RAD2DEG = 180.0 / PAI;
 inline constexpr double DEG2RAD = PAI / 180.0;
@@ -276,6 +280,56 @@ inline int VEHICLE3_SLIDING_MECHANISM_SIGN = sign(1.0);
 inline double v1, v2, v3;
 inline double v1f, v2f, v3f, v1r, v2r, v3r;
 inline double wheelRadius = 0.153; //車輪の半径
+
+
+
+
+//dynamics用
+
+//cakkbackで受け取った値を入れる変数
+inline double steering_angle_FL, steering_angle_FR, steering_angle_RL,steering_angle_RR;
+inline double steering_angle_vel_FL, steering_angle_vel_FR, steering_angle_vel_RL, steering_angle_vel_RR;
+inline double wheel_angle_FL,wheel_angle_FR,wheel_angle_RL,wheel_angle_RR;
+inline double wheel_angle_vel_FL, wheel_angle_vel_FR, wheel_angle_vel_RL, wheel_angle_vel_RR;
+
+
+
+inline double m_wheel = 8;
+inline double m_hinge = 12;
+inline double M_mass = 100 + 2* 12.646385127140846;
+inline double m_b = 100 + 2*12.646385127140846; //車両の質量
+inline double m_w = 2*(m_wheel + m_hinge);
+inline double m_c = 100.0;
+inline double I_theta = vehicle_inertia_coef * 418.647558 + 2*0.755318;
+inline double I_wheel = wheel_inertia_coef *0.029034;
+inline double I_hinge = hinge_inertia_coef*0.021551;
+inline double I_phiF = 2*(I_wheel + I_hinge);
+inline double I_phiR = 2*(I_wheel + I_hinge);
+inline double I_varphiF = 2*(wheel_inertia_coef*0.053334);        
+inline double I_varphiR = 2*(wheel_inertia_coef*0.053334);        
+inline double wheelRadius = 0.153;          
+inline double Q_phiF = 0.0;
+inline double Q_phiR = 0.0;
+inline double Q_varphiF = 0.0;
+inline double Q_varphiR = 0.0;
+
+inline double Q_phiFR = 0.0;
+inline double Q_phiFL = 0.0;
+inline double Q_phiRR = 0.0;
+inline double Q_phiRL = 0.0;
+inline double Q_varphiFR = 0.0;
+inline double Q_varphiFL = 0.0;
+inline double Q_varphiRR = 0.0;
+inline double Q_varphiRL = 0.0;
+inline double nu1 = 0.0;
+inline double nu2 = 0.0;
+inline double nu3 = 0.0;
+inline double u1_act = 0.0; 
+inline double u2_act = 0.0; 
+inline double u3_act = 0.0;
+inline double asd = 0.0;
+inline double athetapd = 0.0;
+inline Eigen::Vector4d lamda_data = Eigen::Vector4d::Zero();
 
 // 初期値設定関数
 // 引数: t, dt, x0, x_new
