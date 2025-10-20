@@ -2,7 +2,7 @@
 #define INITIAL_HPP
 #include <cmath>  // sqrt関数を使うために必要
 #include <vector>
-
+#include <Eigen/Dense>
 
 #define DIM 23
 #define Q_sample 100001  //曲線の分割数
@@ -306,8 +306,7 @@ inline double I_hinge = hinge_inertia_coef*0.021551;
 inline double I_phiF = 2*(I_wheel + I_hinge);
 inline double I_phiR = 2*(I_wheel + I_hinge);
 inline double I_varphiF = 2*(wheel_inertia_coef*0.053334);        
-inline double I_varphiR = 2*(wheel_inertia_coef*0.053334);        
-inline double wheelRadius = 0.153;          
+inline double I_varphiR = 2*(wheel_inertia_coef*0.053334);       
 inline double Q_phiF = 0.0;
 inline double Q_phiR = 0.0;
 inline double Q_varphiF = 0.0;
