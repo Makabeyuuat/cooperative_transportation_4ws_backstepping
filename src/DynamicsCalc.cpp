@@ -55,19 +55,19 @@ void DynamicsCalculator::calcXold(std::vector<double>& x_old){
 
 
      //デバッグ用ログ出力
-	// ROS_INFO_THROTTLE(0.25,"DynamicsCalc:thetav2=%.3f, thetav3=%.3f, thetav5=%.3f, thetav6=%.3f, thetav8=%.3f, thetav9=%.3f",
-     //  thetav2, thetav3, thetav5, thetav6, thetav8, thetav9);
+	ROS_INFO_THROTTLE(0.25,"DynamicsCalc:thetav2=%.3f, thetav3=%.3f, thetav5=%.3f, thetav6=%.3f, thetav8=%.3f, thetav9=%.3f",
+      thetav2, thetav3, thetav5, thetav6, thetav8, thetav9);
 
     //仮想リンクを計算
     // v1
     double th2 = thetav2 - (3.0/2.0)*PAI  + theta4;
-    double th3 = -thetav3 - 0.5*PAI + theta4;
+    double th3 = -thetav3 - PAI/2.0 + theta4;
     // v2
     double th5 = thetav5 + PAI/2.0 + theta7;
     double th6 = -thetav6 + 3.0*PAI/2.0 + theta7;
     // v3
-    double th8 = thetav8 + PAI/2.0 + theta10;
-    double th9 = -thetav9 + 3.0*PAI/2.0 + theta10;
+    double th8 = thetav8 + 5.0*PAI/6.0 + theta10;
+    double th9 = -thetav9 + 7.0*PAI/6.0 + theta10;
 
     //x_oldに格納
     x_old[7]  = th2;
@@ -214,30 +214,25 @@ void DynamicsCalculator::computeCoefficients(const std::vector<double>& x) {
 	v3 = (ai.a8t * cos(Theta9) + ai.a8n * sin(Theta9) - ai.a9n * tan(x[20])) * u1;
 
 
-     Phi[1] = x_old[9] + x_old[8] - x_old[11] + PAI;
-	Phi[2] = x_old[15] + x_old[14] - x_old[17];
-	Phi[3] = x_old[21] + x_old[20] - x_old[23];
+     Phi[1] = x[9] + x[8] - x[11] + PAI;
+	Phi[2] = x[15] + x[14] - x[17];
+	Phi[3] = x[21] + x[20] - x[23];
 
 
-     // まず、前輪はそのまま（v1,v2,v3 は前輪間中点の操舵方向速度）
+     //前輪間中点速度
      v1f = v1;
      v2f = v2;
      v3f = v3;
 
-     // 後輪は rear の姿勢＋rear 操舵角で同じ投影式を作る
-     // delta1_r, delta2_r, delta3_r は各車の「後輪の操舵角」に置き換え（例: x[10], x[16], x[22] 等）
-
-     // vehicle 1 rear @ Theta2
+     //後輪間中点速度
      double a2t_pre = ai.a1t1 * cos(Theta2) + ai.a1n1 * sin(Theta2);
      double a2n_pre = ai.a1t1 * sin(Theta2) - ai.a1n1 * cos(Theta2);
      v1r = (a2t_pre - a2n_pre * tan(x[10])) * u1;
 
-     // vehicle 2 rear @ Theta5
      double a5t_pre = ai.a1t2 * cos(Theta5) + ai.a1n2 * sin(Theta5);
      double a5n_pre = ai.a1t2 * sin(Theta5) - ai.a1n2 * cos(Theta5);
      v2r = (a5t_pre - a5n_pre * tan(x[16])) * u1;
 
-     // vehicle 3 rear @ Theta8
      double a8t_pre = ai.a1t3 * cos(Theta8) + ai.a1n3 * sin(Theta8);
      double a8n_pre = ai.a1t3 * sin(Theta8) - ai.a1n3 * cos(Theta8);
      v3r = (a8t_pre - a8n_pre * tan(x[22])) * u1;

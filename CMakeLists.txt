@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(cooperative_transportation_4ws_description)
+project(cooperative_transportation_4ws_backstepping)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
