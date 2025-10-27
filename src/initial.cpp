@@ -1,5 +1,9 @@
 #include "initial.hpp"
 
+
+Eigen::Map<Eigen::Matrix<double,27,1>> q_map(q_twist);
+Eigen::Map<Eigen::Matrix<double,27,1>> qdot_map(qdot_twist);
+
 void initial(double &t, double &dt, std::vector<double> &x0, std::vector<double> &x_new, std::vector<double> &x_input) {
     t = 66.8;
     dt = 0.02;

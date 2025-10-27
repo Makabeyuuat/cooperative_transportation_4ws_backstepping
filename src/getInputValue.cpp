@@ -133,7 +133,7 @@ void getInputValue::getXInput(std::vector<double>& x_old, std::vector<double>& x
 
 void getInputValue::U1(const std::vector<double>& x_old, int sr_j) {
     w1 = a0;
-	u1 = ((1 - sr.d * sr.Cs) / cos(Thetap0)) * w1;
+	u_kinematics[1] = ((1 - sr.d * sr.Cs) / cos(Thetap0)) * w1;
 }
 
 void getInputValue::U2(const std::vector<double>& x_old, int sr_j) {
@@ -161,7 +161,7 @@ void getInputValue::U2(const std::vector<double>& x_old, int sr_j) {
 
 	w2 = ddd0d / a0 + (k1 + k2) * ((dd0d / a0) - z21) + k1 * k2 * ((d0d / a0) - z22 / a0);
 
-	u2 = (1 / alpha22) * (w2 - alpha21 * u1);
+	u_kinematics[2] = (1 / alpha22) * (w2 - alpha21 * u1);
 }
 
 void getInputValue::U3(const std::vector<double>& x, int sr_j) {
@@ -186,7 +186,7 @@ void getInputValue::U3(const std::vector<double>& x, int sr_j) {
 
 	w3 = ddthetap1d / a0 + (k3 + k4) * ((dthetap1d / a0) - z31) + k3 * k4 * ((thetap1d / a0) - z32 / a0);
 
-	u3 = (1 / alpha33) * (w3 - (alpha31 * u1 + alpha32 * u2));
+	u_kinematics[3] = (1 / alpha33) * (w3 - (alpha31 * u1 + alpha32 * u2));
 }
 
 void getInputValue::U4_U5_U6(const std::vector<double>& x, int sr_j) {
@@ -1818,9 +1818,9 @@ void getInputValue::U4_U5_U6(const std::vector<double>& x, int sr_j) {
 	u6and = u4_inv_a[2][0] * b4 + u4_inv_a[2][1] * b5 + u4_inv_a[2][2] * b6;
 
 
-	u4 = u4and;
-	u5 = u5and;
-	u6 = u6and;
+	u_kinematics(3) = u4and;
+	u_kinematics(4) = u5and;
+	u_kinematics(5) = u6and;
 }
 
 
@@ -5235,9 +5235,9 @@ void getInputValue::U7_U8_U9(const std::vector<double>& x, int sr_j) {
 	u8and = u7_inv_a[1][0] * b7 + u7_inv_a[1][1] * b8 + u7_inv_a[1][2] * b9;
 	u9and = u7_inv_a[2][0] * b7 + u7_inv_a[2][1] * b8 + u7_inv_a[2][2] * b9;
 
-	u7 = u7and;
-	u8 = u8and;
-	u9 = u9and;
+	u_kinematics(6) = u7and;
+	u_kinematics(7) = u8and;
+	u_kinematics(8) = u9and;
       // Eigen::Matrix3d A7;
       // A7 <<  (alpha77 - (K51 / a0)),   (-K52 / a0),              (-K53 / a0),
       //        (alpha87 - (K61 / a0)),   (alpha88 - (K62 / a0)),   (-K63 / a0),
@@ -8831,9 +8831,9 @@ void getInputValue::U10_U11_U12(const std::vector<double>& x, int sr_j) {
 	u11and = u10_inv_a[1][0] * b10 + u10_inv_a[1][1] * b11 + u10_inv_a[1][2] * b12;
 	u12and = u10_inv_a[2][0] * b10 + u10_inv_a[2][1] * b11 + u10_inv_a[2][2] * b12;
 
-	u10 = u10and;
-	u11 = u11and;
-	u12 = u12and;
+	u_kinematics(9) = u10and;
+	u_kinematics(10) = u11and;
+	u_kinematics(11) = u12and;
    
 
    // // ... 係数の計算（alpha****, K**, a0, k**, thetap**, dthetap**, ddthetap**, z**, u2, u3）までは今まで通り ...

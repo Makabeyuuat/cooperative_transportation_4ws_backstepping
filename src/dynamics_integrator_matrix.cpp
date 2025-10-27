@@ -42,12 +42,10 @@ DynamicsIntegrator::DynamicsIntegrator(double m_b,
 
 
 //状態変数の目標加速度を計算
-Eigen::Matrix<double,5,1> DynamicsIntegrator::computeXAlpha(
+Eigen::Matrix<double,23,1> DynamicsIntegrator::computeXAlpha(
     const std::vector<double> x,
     const std::vector<double> x_d,
-    double u1,
-    double u2,
-    double u3)
+    std::vector<double> u_kinematics)
     {
         double x_pos      = x[1];
         double y_pos      = x[2];
@@ -64,53 +62,78 @@ Eigen::Matrix<double,5,1> DynamicsIntegrator::computeXAlpha(
         u1_act = xdot * cos(thetap + phi1) + ydot * sin(thetap + phi1);
         u2_act = phi1dot;
         u3_act = phi2dot;
+
+        Eigen::Matrix<double,23,1> Xalpha;
         
         // 結果格納用ベクトル
-        Eigen::Matrix<double,5,1> Xalpha;
+        Eigen::Matrix<double,12,1> u_act;
+        u_act<<
+            ;
         
         //状態変数ベクトル
-        Eigen::Matrix<double,5,1> Sx;
+        Eigen::Matrix<double,23,1> Sx;
         Sx<<
             kinematics_solver_.SX_funcs[0](),
-            kinematics_solver_.SX_funcs[3](),
-            kinematics_solver_.SX_funcs[6](),
-            kinematics_solver_.SX_funcs[10](),
-            kinematics_solver_.SX_funcs[14]();
+            kinematics_solver_.SX_funcs[3](),kinematics_solver_.SX_funcs[6](),
+            kinematics_solver_.SX_funcs[10](),kinematics_solver_.SX_funcs[14](),
+            kinematics_solver_.SX_funcs[0](),kinematics_solver_.SX_funcs[3](),
+            kinematics_solver_.SX_funcs[6](),kinematics_solver_.SX_funcs[10](),
+            kinematics_solver_.SX_funcs[14](),kinematics_solver_.SX_funcs[0](),
+            kinematics_solver_.SX_funcs[3](),kinematics_solver_.SX_funcs[6](),
+            kinematics_solver_.SX_funcs[10](),kinematics_solver_.SX_funcs[14](),
+            kinematics_solver_.SX_funcs[0](),kinematics_solver_.SX_funcs[3](),
+            kinematics_solver_.SX_funcs[6](),kinematics_solver_.SX_funcs[10](),
+            kinematics_solver_.SX_funcs[14](),kinematics_solver_.SX_funcs[0](),
+            kinematics_solver_.SX_funcs[3](),kinematics_solver_.SX_funcs[6]();
         
-        Eigen::Matrix<double,5,1> dSx;
+        Eigen::Matrix<double,23,1> dSx;
         dSx <<
             kinematics_solver_.dSXdt_funcs[0](),
-            kinematics_solver_.dSXdt_funcs[3](),
-            kinematics_solver_.dSXdt_funcs[6](),
-            kinematics_solver_.dSXdt_funcs[10](),
-            kinematics_solver_.dSXdt_funcs[14]();
+            kinematics_solver_.dSXdt_funcs[3](),kinematics_solver_.dSXdt_funcs[6](),
+            kinematics_solver_.dSXdt_funcs[10](),kinematics_solver_.dSXdt_funcs[14](),
+            kinematics_solver_.dSXdt_funcs[0](),kinematics_solver_.dSXdt_funcs[3](),
+            kinematics_solver_.dSXdt_funcs[6](),kinematics_solver_.dSXdt_funcs[10](),
+            kinematics_solver_.dSXdt_funcs[14](),kinematics_solver_.dSXdt_funcs[0](),
+            kinematics_solver_.dSXdt_funcs[3](),kinematics_solver_.dSXdt_funcs[6](),
+            kinematics_solver_.dSXdt_funcs[10](),kinematics_solver_.dSXdt_funcs[14](),
+            kinematics_solver_.dSXdt_funcs[0](),kinematics_solver_.dSXdt_funcs[3](),
+            kinematics_solver_.dSXdt_funcs[6](),kinematics_solver_.dSXdt_funcs[10](),
+            kinematics_solver_.dSXdt_funcs[14](),kinematics_solver_.dSXdt_funcs[0](),
+            kinematics_solver_.dSXdt_funcs[3](),kinematics_solver_.dSXdt_funcs[6]();
         
         // 速度誤差
-        double r_b1 = u1_act - u1;
-        double r_b2 = u2_act - u2;
-        double r_b3 = u3_act - u3;
+        // double r_b1 = u1_act - u1;
+        // double r_b2 = u2_act - u2;
+        // double r_b3 = u3_act - u3;
         
       
         //偏差ベクトル
-        Eigen::Matrix<double,3,1> r_b;
-        r_b <<r_b1, r_b2, r_b3;
+        Eigen::Matrix<double,12,1> r_b = u_act - u_kinematics;
         
         //ゲイン
-        Eigen::Matrix<double,3,3> C;
-        C << 
-            10.0, 0.0, 0.0,
-            0.0, 10.0, 0.0,
-            0.0, 0.0, 10.0;
-            
-        Eigen::Vector3d dot_C_rb = C*(r_b);
+        Eigen::Matrix<double,12,1> gains;
+        gains << 10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0;
+        Eigen::Matrix<double,12,12> C = gains.asDiagonal();
 
-        double dot_C_rb1 = dot_C_rb(0);
-        double dot_C_rb2 = dot_C_rb(1);
-        double dot_C_rb3 = dot_C_rb(2);
+            
+       Eigen::Matrix<double,12,1> dot_C_rb = C*r_b;
+
+ 
         //目標加速度νを計算
-        nu1 = -dot_C_rb1 + kinematics_solver_.pdud_funcs[0]();
-        nu2 = -dot_C_rb2 + kinematics_solver_.pdud_funcs[1]();
-        nu3 = -dot_C_rb3 + kinematics_solver_.pdud_funcs[2]();
+        Eigen::Matrix<double,12,1> pdud;
+        pdud<<
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0](),
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0](),
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0](),
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0](),
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0](),
+              kinematics_solver_.pdud_funcs[0](),kinematics_solver_.pdud_funcs[0]();
+
+
+        Eigen::Matrix<double,12,1> nu = -dot_C_rb + pdud;
+        // nu1 = -dot_C_rb1 + kinematics_solver_.pdud_funcs[0]();
+        // nu2 = -dot_C_rb2 + kinematics_solver_.pdud_funcs[1]();
+        // nu3 = -dot_C_rb3 + kinematics_solver_.pdud_funcs[2]();
         
         
         // 目標加速度を各成分に割り当て
@@ -125,15 +148,14 @@ Eigen::Matrix<double,5,1> DynamicsIntegrator::computeXAlpha(
 
 
 //一般化座標の目標加速度を計算
-Eigen::Matrix<double,7,1> DynamicsIntegrator::computeAlpha(
-    const Eigen::Matrix<double,7,1>& q,
-    const Eigen::Matrix<double,7,1>& qdot,
-    double u1,
-    double u2)
+Eigen::Matrix<double,27,1> DynamicsIntegrator::computeAlpha(
+    const Eigen::Matrix<double,27,1>& q,
+    const Eigen::Matrix<double,27,1>& qdot,
+    std::vector<double> u_kinematics)
     {
-        Eigen::Matrix<double,7,1> alpha;
+        Eigen::Matrix<double,27,1> alpha;
         //状態変数ベクトルの目標加速度 
-        Eigen::Matrix<double,5,1> Xalpha = computeXAlpha(x_old, x_d, u1, u2, u3);
+        Eigen::Matrix<double,23,1> Xalpha = computeXAlpha(x_old, x_d, u1, u2, u3);
 
         asd = Xalpha(0);
         athetapd = Xalpha(2);
@@ -151,10 +173,9 @@ Eigen::Matrix<double,7,1> DynamicsIntegrator::computeAlpha(
 
 
 void DynamicsIntegrator::step(
-    const Eigen::Matrix<double,7,1>& q,
-    const Eigen::Matrix<double,7,1>& qdot,
-    double u1,
-    double u2)
+    const Eigen::Matrix<double,27,1>& q,
+    const Eigen::Matrix<double,27,1>& qdot,
+    std::vector<double> u_kinematics)
     {
         double x      = q(0);
         double y      = q(1);
@@ -173,7 +194,7 @@ void DynamicsIntegrator::step(
         double varphiFdot = qdot(6);
 
         //目標加速度の取得
-        Eigen::Matrix<double,7,1> alpha = computeAlpha(q, qdot, u1, u2);
+        Eigen::Matrix<double,27,1> alpha = computeAlpha(q, qdot, u1, u2);
 
         //qの目標加速度を分解
         Eigen::Vector3d alpha3 = alpha.head<3>();

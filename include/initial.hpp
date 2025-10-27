@@ -115,6 +115,18 @@ inline bool got_body_pos = false;
 inline std::vector<double> x_old = std::vector<double>(DIM+ 1, 0.0);
 inline std::vector<double> x_new = std::vector<double>(DIM + 1, 0.0);
 inline std::vector<double> x_input = std::vector<double>(DIM + 1, 0.0);
+inline Eigen::Matrix<double,12,1> u_kinematics = Eigen::Matrix<double,12,1>::Zero();
+inline std::vector<double> acceleration_x = std::vector<double>(DIM + 1, 0.0);
+inline std::vector<double> acceleration_q = std::vector<double>(DIM + 1, 0.0);
+
+inline double q_twist[27] = {0.0};
+inline double qdot_twist[27] = {0.0};
+inline std::vector<double> x_d = std::vector<double>(Dim + 1, 0.0);
+inline std::vector<double> x_dd = std::vector<double>(Dim + 1, 0.0);
+extern Eigen::Map<Eigen::Matrix<double,27,1>> q_map;
+extern Eigen::Map<Eigen::Matrix<double,27,1>> qdot_map;
+extern Eigen::Map<Eigen::Matrix<double,27,1>> qddot_map;
+
 
 //input
 //制御入力
@@ -285,12 +297,23 @@ inline double wheelRadius = 0.153; //車輪の半径
 
 
 //dynamics用
-
 //cakkbackで受け取った値を入れる変数
-inline double steering_angle_FL, steering_angle_FR, steering_angle_RL,steering_angle_RR;
-inline double steering_angle_vel_FL, steering_angle_vel_FR, steering_angle_vel_RL, steering_angle_vel_RR;
-inline double wheel_angle_FL,wheel_angle_FR,wheel_angle_RL,wheel_angle_RR;
-inline double wheel_angle_vel_FL, wheel_angle_vel_FR, wheel_angle_vel_RL, wheel_angle_vel_RR;
+inline double v1_steering_angle_FL, v1_steering_angle_FR, v1_steering_angle_RL,v1_steering_angle_RR;
+inline double v1_steering_angle_vel_FL, v1_steering_angle_vel_FR, v1_steering_angle_vel_RL, v1_steering_angle_vel_RR;
+inline double v1_wheel_angle_FL,v1_wheel_angle_FR,v1_wheel_angle_RL,v1_wheel_angle_RR;
+inline double v1_wheel_angle_vel_FL, v1_wheel_angle_vel_FR, v1_wheel_angle_vel_RL, v1_wheel_angle_vel_RR;
+
+inline double v2_steering_angle_FL,     v2_steering_angle_FR,     v2_steering_angle_RL,     v2_steering_angle_RR;
+inline double v2_steering_angle_vel_FL, v2_steering_angle_vel_FR, v2_steering_angle_vel_RL, v2_steering_angle_vel_RR;
+inline double v2_wheel_angle_FL,        v2_wheel_angle_FR,        v2_wheel_angle_RL,        v2_wheel_angle_RR;
+inline double v2_wheel_angle_vel_FL,    v2_wheel_angle_vel_FR,    v2_wheel_angle_vel_RL,    v2_wheel_angle_vel_RR;
+
+inline double v3_steering_angle_FL,     v3_steering_angle_FR,     v3_steering_angle_RL,     v3_steering_angle_RR;
+inline double v3_steering_angle_vel_FL, v3_steering_angle_vel_FR, v3_steering_angle_vel_RL, v3_steering_angle_vel_RR;
+inline double v3_wheel_angle_FL,        v3_wheel_angle_FR,        v3_wheel_angle_RL,        v3_wheel_angle_RR;
+inline double v3_wheel_angle_vel_FL,    v3_wheel_angle_vel_FR,    v3_wheel_angle_vel_RL,    v3_wheel_angle_vel_RR;
+inline double delta_vel1, delta_vel2, delta_vel3;
+
 
 
 

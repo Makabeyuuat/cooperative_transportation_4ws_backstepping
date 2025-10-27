@@ -58,24 +58,20 @@ class DynamicsIntegrator {
 public:
 
     //新規メソッド: バックステッピングから得られる目標加速度を計算する
-    Eigen::Matrix<double,7,1> computeAlpha(
-        const Eigen::Matrix<double,7,1>& q, // 状態ベクトル (x,y,θ,φ,ψ_f,ψ_r)
-        const Eigen::Matrix<double,7,1>& qdot,     // 速度ベクトル         
-        double u1,                                   // 前輪/後輪目標前進速度
-        double u2);
+    Eigen::Matrix<double,27,1> computeAlpha(
+        const Eigen::Matrix<double,27,1>& q, // 状態ベクトル (x,y,θ,φ,ψ_f,ψ_r)
+        const Eigen::Matrix<double,27,1>& qdot,     // 速度ベクトル         
+        std::vector<double> u_kinematics);
 
-    Eigen::Matrix<double,5,1> computeXAlpha(
+    Eigen::Matrix<double,23,1> computeXAlpha(
         std::vector<double> x_d,
         std::vector<double> x_dd,
-        double u1,
-        double u2,
-        double u3);
+        std::vector<double> u_kinematics);
 
-     Eigen::Matrix<double,7,1> computeAlpha(const Eigen::Matrix<double,7,1>& q,
-                                            const Eigen::Matrix<double,7,1>& qdot,
-                                            double u1,
-                                            double u2,
-                                            const Eigen::Matrix<double,7,1>& qddot);
+     Eigen::Matrix<double,27,1> computeAlpha(const Eigen::Matrix<double,27,1>& q,
+                                            const Eigen::Matrix<double,27,1>& qdot,
+                                            std::vector<double> u_kinematics,
+                                            const Eigen::Matrix<double,27,1>& qddot);
 
     DynamicsIntegrator(double m_b,
                        double I_theta,
@@ -88,10 +84,9 @@ public:
                        getInputValue& inputValue);
 
 
-    void step(const Eigen::Matrix<double,7,1>& q,
-              const Eigen::Matrix<double,7,1>& qdot,
-              double u1,
-              double u2);
+    void step(const Eigen::Matrix<double,27,1>& q,
+              const Eigen::Matrix<double,27,1>& qdot,
+              std::vector<double> u_kinematics);
 
 private:
         KinematicsSolver kinematics_solver_;
