@@ -1,7 +1,7 @@
-#include "getInputValue.hpp"
-#include "initial.hpp"
-#include "differential_equations.hpp"
-#include "mathFunc.h"
+#include "cooperative_transportation_4ws_backstepping/getInputValue.hpp"
+#include "cooperative_transportation_4ws_backstepping/initial.hpp"
+#include "cooperative_transportation_4ws_backstepping/differential_equations.hpp"
+#include "cooperative_transportation_4ws_backstepping/mathFunc.h"
 #include <ros/ros.h> 
 #include <Eigen/Dense>
 
@@ -16,6 +16,126 @@ getInputValue::getInputValue(double h)
    
 {
 
+}
+
+//内輪差考慮
+array<double,2> getInputValue::computeRearWheelOmegas(double speed, double steeringAngle) {
+    const double W = 0.05;            // トレッド幅[m]
+    array<double,2> omegas;
+
+    if (fabs(steeringAngle) < 1e-6) {
+        double omega = speed / wheelRadius;
+        omegas[0] = omega;
+        omegas[1] = omega;
+        return omegas;
+    }
+    double absPhi = fabs(steeringAngle);
+    double R = lv / tan(absPhi);
+    double R_in  = R - W/2.0;
+    double R_out = R + W/2.0;
+    double v_in  = speed * (R_in  / R);
+    double v_out = speed * (R_out / R);
+    double omega_in  = v_in  / wheelRadius;
+    double omega_out = v_out / wheelRadius;
+
+    if (steeringAngle > 0) {
+        // 左折: 左が内輪
+        omegas[0] = omega_in;
+        omegas[1] = omega_out;
+    } else {
+        // 右折: 右が内輪
+        omegas[0] = omega_out;
+        omegas[1] = omega_in;
+    }
+    return omegas;
+}
+
+
+
+// 入力がアクスルごとのトルク Q の場合
+std::array<double,2> getInputValue::computeFrontWheelTorque(
+    double Qf,
+    double steeringAngleFront,
+    double steeringAngleRear)
+{
+    const double Wf = 0.8;  // 前輪トレッド幅 [m]
+    std::array<double,2> torques;
+
+    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
+    if (std::fabs(tan_diff) < 1e-9) {
+        torques[0] = Qf * 0.5;
+        torques[1] = Qf * 0.5;
+        return torques;
+    }
+
+    // 1) リアアクスル基準での回転中心半径
+    double R_rear_center = lv / tan_diff;
+
+    // 2) 前輪アクスルまで平行移動
+    double Rf_center = R_rear_center + lv;
+
+    // 3) 内輪／外輪の絶対半径
+    double Rf_abs   = std::abs(Rf_center);
+    double Rf_inner = Rf_abs - Wf/2.0;
+    double Rf_outer = Rf_abs + Wf/2.0;
+
+    // 4) 内外で逆比（パワー均等）にトルクを配分
+    double sum = Rf_inner + Rf_outer;
+    double Tin = Qf * (Rf_outer / sum);
+    double Tou = Qf * (Rf_inner / sum);
+
+    // 5) 旋回方向に応じて左右に割り当て
+    if (tan_diff > 0) {
+        // 左折：左が内輪
+        torques[0] = Tin;  // 左
+        torques[1] = Tou;  // 右
+    } else {
+        // 右折：右が内輪
+        torques[0] = Tou;  // 左
+        torques[1] = Tin;  // 右
+    }
+    return torques;
+}
+
+std::array<double,2> getInputValue::computeRearWheelTorque(
+    double Qr,
+    double steeringAngleFront,
+    double steeringAngleRear)
+{
+    const double Wr = 0.8;  // 後輪トレッド幅 [m]
+    std::array<double,2> torques;
+
+    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
+    if (std::fabs(tan_diff) < 1e-9) {
+        torques[0] = Qr * 0.5;
+        torques[1] = Qr * 0.5;
+        return torques;
+    }
+
+    // 1) リアアクスル基準での回転中心半径
+    double Rr_center = lv / tan_diff;
+
+    // 2) 内輪／外輪の絶対半径
+    double Rr_abs   = std::abs(Rr_center);
+    double Rr_inner = Rr_abs - Wr/2.0;
+    double Rr_outer = Rr_abs + Wr/2.0;
+
+    // 3) パワー均等配分
+    double sum = Rr_inner + Rr_outer;
+    double Tin = Qr * (Rr_outer / sum);
+    double Tou = Qr * (Rr_inner / sum);
+
+    // 4) 左右アサイン
+    if (tan_diff > 0) {
+        // 左折
+        torques[0] = Tin;
+        torques[1] = Tou;
+    } else {
+        // 右折
+        torques[0] = Tou;
+        torques[1] = Tin;
+    }
+    return torques;
 }
 
 void getInputValue::rungeKutta(std::vector<double>& x_old, int sr_j) {

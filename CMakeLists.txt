@@ -63,31 +63,8 @@ target_link_libraries(kinematics_solver
 )
 
 # -------- 既存ノード --------
-add_executable(cooperative_transportation_velocity
-  src/cooperative_transportation_velocity.cpp
-)
-target_link_libraries(cooperative_transportation_velocity
-  ${catkin_LIBRARIES}
-)
-
-add_executable(formclosure_test
-  src/formclosure_test.cpp
-)
-target_link_libraries(formclosure_test
-  ${catkin_LIBRARIES}
-)
-
-add_executable(steering_desired_controller
-  src/main.cpp
-  src/vehicle.cpp
-  src/callback.cpp
-)
-target_link_libraries(steering_desired_controller
-  ${catkin_LIBRARIES}
-)
-
-add_executable(cooperative_transportation_kinematics_controller
-  src/cooperative_transportation_kinematics.cpp
+add_executable(cooperative_transportation_dynamics_controller
+  src/cooperative_transportation_dynamics.cpp
   src/vehicle_ct.cpp
   src/callback_ct.cpp
   src/csvLogger.cpp
@@ -97,9 +74,13 @@ add_executable(cooperative_transportation_kinematics_controller
   src/mathFunc.cpp
   src/DynamicsCalc.cpp
   src/initial.cpp
+  src/dynamics_integrator_matrix.cpp
 )
+
+
+
 # ← kinematics_solver を使う場合はリンク
-target_link_libraries(cooperative_transportation_kinematics_controller
+target_link_libraries(cooperative_transportation_dynamics_controller
   kinematics_solver
   ${catkin_LIBRARIES}
 )

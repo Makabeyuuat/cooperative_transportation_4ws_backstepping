@@ -1,4 +1,4 @@
-#include "callback_ct.hpp"
+#include "cooperative_transportation_4ws_backstepping/callback_ct.hpp"
 #include "initial.hpp"
 #include <ros/ros.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -174,40 +174,49 @@ void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg)
 
         //q：各車両の後輪の操舵角と操舵角速度を一般化座標ベクトルに格納
         //v1
-        q_twist[6] = (v1_steering_angle_FL + v1_steering_angle_FR)/2;
-        q_twist[7] = (v1_wheel_angle_FL + v1_wheel_angle_FR)/2;
-        q_twist[8] = (v1_steering_angle_RL + v1_steering_angle_RR)/2;
-        q_twist[9] = (v1_wheel_angle_RL + v1_wheel_angle_RR)/2;
-        qdot_twist[6] = (v1_steering_angle_vel_FL + v1_steering_angle_vel_FR)/2;
-        qdot_twist[7] = (v1_wheel_angle_vel_FL + v1_wheel_angle_vel_FR)/2;
-        qdot_twist[8] = (v1_steering_angle_vel_RL + v1_steering_angle_vel_RR)/2;
-        qdot_twist[9] = (v1_wheel_angle_vel_RL + v1_wheel_angle_vel_RR)/2;
+        q_twist[15] = (v1_steering_angle_FL + v1_steering_angle_FR)/2;
+        q_twist[16] = (v1_wheel_angle_FL + v1_wheel_angle_FR)/2;
+        q_twist[17] = (v1_steering_angle_RL + v1_steering_angle_RR)/2;
+        q_twist[18] = (v1_wheel_angle_RL + v1_wheel_angle_RR)/2;
+        qdot_twist[15] = (v1_steering_angle_vel_FL + v1_steering_angle_vel_FR)/2;
+        qdot_twist[16] = (v1_wheel_angle_vel_FL + v1_wheel_angle_vel_FR)/2;
+        qdot_twist[17] = (v1_steering_angle_vel_RL + v1_steering_angle_vel_RR)/2;
+        qdot_twist[18] = (v1_wheel_angle_vel_RL + v1_wheel_angle_vel_RR)/2;
+
+        x_d[8] = qdot_twist[15];
+        x_d[10] = qdot_twist[17];
         //v2
-        q_twist[14] = (v2_steering_angle_FL + v2_steering_angle_FR)/2;
-        q_twist[15] = (v2_wheel_angle_FL + v2_wheel_angle_FR)/2;
-        q_twist[16] = (v2_steering_angle_RL + v2_steering_angle_RR)/2;
-        q_twist[17] = (v2_wheel_angle_RL + v2_wheel_angle_RR)/2;
-        qdot_twist[14] = (v2_steering_angle_vel_FL + v2_steering_angle_vel_FR)/2;
-        qdot_twist[15] = (v2_wheel_angle_vel_FL + v2_wheel_angle_vel_FR)/2;
-        qdot_twist[16] = (v2_steering_angle_vel_RL + v2_steering_angle_vel_RR)/2;
-        qdot_twist[17] = (v2_wheel_angle_vel_RL + v2_wheel_angle_vel_RR)/2;
+        q_twist[19] = (v2_steering_angle_FL + v2_steering_angle_FR)/2;
+        q_twist[20] = (v2_wheel_angle_FL + v2_wheel_angle_FR)/2;
+        q_twist[21] = (v2_steering_angle_RL + v2_steering_angle_RR)/2;
+        q_twist[22] = (v2_wheel_angle_RL + v2_wheel_angle_RR)/2;
+        qdot_twist[19] = (v2_steering_angle_vel_FL + v2_steering_angle_vel_FR)/2;
+        qdot_twist[20] = (v2_wheel_angle_vel_FL + v2_wheel_angle_vel_FR)/2;
+        qdot_twist[21] = (v2_steering_angle_vel_RL + v2_steering_angle_vel_RR)/2;
+        qdot_twist[22] = (v2_wheel_angle_vel_RL + v2_wheel_angle_vel_RR)/2;
+
+        x_d[14] = qdot_twist[19];
+        x_d[16] = qdot_twist[21];
         //v3
-        q_twist[22] = (v3_steering_angle_FL + v3_steering_angle_FR)/2;
-        q_twist[23] = (v3_wheel_angle_FL + v3_wheel_angle_FR)/2;
-        q_twist[24] = (v3_steering_angle_RL + v3_steering_angle_RR)/2;
-        q_twist[25] = (v3_wheel_angle_RL + v3_wheel_angle_RR)/2;
-        qdot_twist[22] = (v3_steering_angle_vel_FL + v3_steering_angle_vel_FR)/2;
-        qdot_twist[23] = (v3_wheel_angle_vel_FL + v3_wheel_angle_vel_FR)/2;
-        qdot_twist[24] = (v3_steering_angle_vel_RL + v3_steering_angle_vel_RR)/2;
-        qdot_twist[25] = (v3_wheel_angle_vel_RL + v3_wheel_angle_vel_RR)/2;
+        q_twist[23] = (v3_steering_angle_FL + v3_steering_angle_FR)/2;
+        q_twist[24] = (v3_wheel_angle_FL + v3_wheel_angle_FR)/2;
+        q_twist[25] = (v3_steering_angle_RL + v3_steering_angle_RR)/2;
+        q_twist[26] = (v3_wheel_angle_RL + v3_wheel_angle_RR)/2;
+        qdot_twist[23] = (v3_steering_angle_vel_FL + v3_steering_angle_vel_FR)/2;
+        qdot_twist[24] = (v3_wheel_angle_vel_FL + v3_wheel_angle_vel_FR)/2;
+        qdot_twist[25] = (v3_steering_angle_vel_RL + v3_steering_angle_vel_RR)/2;
+        qdot_twist[26] = (v3_wheel_angle_vel_RL + v3_wheel_angle_vel_RR)/2;
+
+        x_d[20] = qdot_twist[23];
+        x_d[22] = qdot_twist[25];
 
         //q：摺動機構の変位 
-        q_twist[10] = delta_pos[0];
-        q_twist[18] = delta_pos[1];
-        q_twist[26] = delta_pos[2];
-        qdot_twist[10] = delta_vel1;
-        qdot_twist[18] = delta_vel2;
-        qdot_twist[26] = delta_vel3;
+        q_twist[6] = delta_pos[0];
+        q_twist[10] = delta_pos[1];
+        q_twist[14] = delta_pos[2];
+        qdot_twist[6] = delta_vel1;
+        qdot_twist[10] = delta_vel2;
+        qdot_twist[14] = delta_vel3;
     }
 }
 
@@ -339,15 +348,15 @@ void trueLinkagePoint2Callback(const nav_msgs::Odometry::ConstPtr& msg)
     x_old[17] = yaw;
 
     //q：x2,y2,theta2の座標
-    q_twist[11] = linkage_point2_pose.pose.position.x;
-    q_twist[12] = linkage_point2_pose.pose.position.y;
-    q_twist[13] = yaw; 
-    qdot_twist[11] = msg->twist.twist.linear.x;
-    qdot_twist[12] = msg->twist.twist.linear.y;
-    qdot_twist[13] = msg->twist.twist.angular.z;
-    x_d[11] = qdot_twist[11];
-    x_d[12] = qdot_twist[12];
-    x_d[13] = qdot_twist[13];
+    q_twist[7] = linkage_point2_pose.pose.position.x;
+    q_twist[8] = linkage_point2_pose.pose.position.y;
+    q_twist[9] = yaw; 
+    qdot_twist[7] = msg->twist.twist.linear.x;
+    qdot_twist[8] = msg->twist.twist.linear.y;
+    qdot_twist[9] = msg->twist.twist.angular.z;
+    x_d[11] = qdot_twist[7];
+    x_d[12] = qdot_twist[8];
+    x_d[13] = qdot_twist[9];
     
     // ROS_INFO("True position of [linkage_point2] (world): x=%f, y=%f, z=%f | Orientation: roll=%f, pitch=%f, yaw=%f",
     //          linkage_point2_pose.pose.position.x,
@@ -376,15 +385,15 @@ void trueLinkagePoint3Callback(const nav_msgs::Odometry::ConstPtr& msg)
     x_old[23] = yaw;
 
     //q：x3,y3,theta3の座標
-    q_twist[19] = linkage_point3_pose.pose.position.x;
-    q_twist[20] = linkage_point3_pose.pose.position.y;
-    q_twist[21] = yaw; 
-    qdot_twist[19] = msg->twist.twist.linear.x;
-    qdot_twist[20] = msg->twist.twist.linear.y;
-    qdot_twist[21] = msg->twist.twist.angular.z;
-    x_d[19] = qdot_twist[19];
-    x_d[20] = qdot_twist[20];
-    x_d[21] = qdot_twist[21];
+    q_twist[11] = linkage_point3_pose.pose.position.x;
+    q_twist[12] = linkage_point3_pose.pose.position.y;
+    q_twist[13] = yaw; 
+    qdot_twist[11] = msg->twist.twist.linear.x;
+    qdot_twist[12] = msg->twist.twist.linear.y;
+    qdot_twist[13] = msg->twist.twist.angular.z;
+    x_d[19] = qdot_twist[11];
+    x_d[20] = qdot_twist[12];
+    x_d[21] = qdot_twist[13];
     
     // ROS_INFO("True position of [linkage_point3] (world): x=%f, y=%f, z=%f | Orientation: roll=%f, pitch=%f, yaw=%f",
     //          linkage_point3_pose.pose.position.x,
