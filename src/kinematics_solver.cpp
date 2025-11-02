@@ -40,9 +40,6 @@ Eigen::Matrix<double,27,1> KinematicsSolver::Kxi_vec() const {
     return fill_from_vec<27>(this, Kxi_tbl);
 }
 
-Eigen::Matrix<double,5,1> KinematicsSolver::pd_G11_vec() const {
-    return fill_from_vec<5>(this, pd_G11_tbl);
-}
 
 Eigen::Matrix<double,12,1> KinematicsSolver::pd_ud_vec() const {
     return fill_from_vec<12>(this, pd_ud_tbl);
@@ -73,6 +70,3 @@ Eigen::Matrix<double,23,12> KinematicsSolver::dSXdt_mat() const {
     return fill_from_tbl<23,12>(this, dSXdt_tbl);
 }
 
-Eigen::Matrix<double,12,2> KinematicsSolver::z_mat() const {
-    return fill_from_tbl<12,2>(this, z_tbl);
-}

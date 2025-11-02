@@ -121,8 +121,8 @@ inline std::vector<double> acceleration_q = std::vector<double>(DIM + 1, 0.0);
 
 inline double q_twist[27] = {0.0};
 inline double qdot_twist[27] = {0.0};
-inline std::vector<double> x_d = std::vector<double>(Dim + 1, 0.0);
-inline std::vector<double> x_dd = std::vector<double>(Dim + 1, 0.0);
+inline std::vector<double> x_d = std::vector<double>(DIM + 1, 0.0);
+inline std::vector<double> x_dd = std::vector<double>(DIM + 1, 0.0);
 extern Eigen::Map<Eigen::Matrix<double,27,1>> q_map;
 extern Eigen::Map<Eigen::Matrix<double,27,1>> qdot_map;
 extern Eigen::Map<Eigen::Matrix<double,27,1>> qddot_map;
