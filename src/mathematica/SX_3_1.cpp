@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_SX_3_1_()
 {
 double ret;
-ret = -((sr.Cs*Cos(Thetap0))/(1 - sr.Cs*sr.d));
+ret = -((sr.0Cs*Cos(Thetap0))/(1 - sr.0Cs*sr.0d));
 return ret;
 }

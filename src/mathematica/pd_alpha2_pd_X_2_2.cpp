@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_pd_alpha2_pd_X_2_2_()
 {
 double ret;
-ret = -(sr.Cs*Power(Sec(Thetap0),2));
+ret = -(sr.0Cs*Power(Sec(Thetap0),2));
 return ret;
 }

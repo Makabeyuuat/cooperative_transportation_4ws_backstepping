@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_pd_Z2_pd_X_1_2_()
 {
 double ret;
-ret = -(sr.Cs*Tan(Thetap0));
+ret = -(sr.0Cs*Tan(Thetap0));
 return ret;
 }

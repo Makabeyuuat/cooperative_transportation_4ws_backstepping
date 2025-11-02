@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_z_2_2_()
 {
 double ret;
-ret = sr.d;
+ret = sr.0d;
 return ret;
 }

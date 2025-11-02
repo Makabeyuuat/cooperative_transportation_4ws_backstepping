@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_pd_alpha3_pd_X_3_1_()
 {
 double ret;
-ret = -(sr.d*Sec(Thetap0)*((Cos(x_old[4] - Thetap0 + Thetap1)*Sec(x_old[4]))/l1 + (Sec(x_old[4])*Sin(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4]))/l1)*sr.Cs1);
+ret = -(sr.0d*Sec(Thetap0)*((Cos(x_old[4] - Thetap0 + Thetap1)*Sec(x_old[4]))/l1 + (Sec(x_old[4])*Sin(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4]))/l1)*sr.0Cs1);
 return ret;
 }

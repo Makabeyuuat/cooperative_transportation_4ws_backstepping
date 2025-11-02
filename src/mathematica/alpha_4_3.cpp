@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_alpha_4_3_()
 {
 double ret;
-ret = ((1 - sr.Cs*sr.d)*Sec(x_old[6])*Sec(Thetap0)*(-(Cos(x_old[4] - Thetap0 + Thetap1)*Cos(x_old[4] - x_old[6] + Thetap1 - Thetap2)) + Sin(x_old[4] - Thetap0 + Thetap1)*Sin(x_old[4] - x_old[6] + Thetap1 - Thetap2) - Sin(x_old[4] - x_old[6] + Thetap1 - Thetap2)*(-Sin(x_old[4] - Thetap0 + Thetap1) + 2*Power(Sec(x_old[4]),2)*Sin(x_old[4] - Thetap0 + Thetap1) + 2*Cos(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4])) - Cos(x_old[4] - x_old[6] + Thetap1 - Thetap2)*(Cos(x_old[4] - Thetap0 + Thetap1) + 2*Sin(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4]))))/l2;
+ret = ((1 - sr.0Cs*sr.0d)*Sec(x_old[6])*Sec(Thetap0)*(-(Cos(x_old[4] - Thetap0 + Thetap1)*Cos(x_old[4] - x_old[6] + Thetap1 - Thetap2)) + Sin(x_old[4] - Thetap0 + Thetap1)*Sin(x_old[4] - x_old[6] + Thetap1 - Thetap2) - Sin(x_old[4] - x_old[6] + Thetap1 - Thetap2)*(-Sin(x_old[4] - Thetap0 + Thetap1) + 2*Power(Sec(x_old[4]),2)*Sin(x_old[4] - Thetap0 + Thetap1) + 2*Cos(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4])) - Cos(x_old[4] - x_old[6] + Thetap1 - Thetap2)*(Cos(x_old[4] - Thetap0 + Thetap1) + 2*Sin(x_old[4] - Thetap0 + Thetap1)*Tan(x_old[4]))))/l2;
 return ret;
 }

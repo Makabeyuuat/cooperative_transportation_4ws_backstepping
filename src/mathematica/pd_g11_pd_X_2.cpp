@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_pd_g11_pd_X_2_()
 {
 double ret;
-ret = (sr.Cs*Cos(Thetap0))/Power(1 - sr.Cs*sr.d,2);
+ret = (sr.0Cs*Cos(Thetap0))/Power(1 - sr.0Cs*sr.0d,2);
 return ret;
 }
