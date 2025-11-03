@@ -200,7 +200,7 @@ inline double alpha121, alpha122, alpha123, alpha1210, alpha1211, alpha1212;
 
 
 //重心の目標相対位置関数
-inline double d0d, dd0d, ddd0d, ddd	d0d;
+inline double d0d, dd0d, ddd0d, dddd0d;
 inline double thetap1d, dthetap1d, ddthetap1d, dddthetap1d;
 
 inline double thetap2d;
