@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_aqd_20_()
 {
 double ret;
-ret = nu9;
+ret = nu(8);
 return ret;
 }

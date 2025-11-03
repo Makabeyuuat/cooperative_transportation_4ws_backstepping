@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_aqd_26_()
 {
 double ret;
-ret = nu11;
+ret = nu(10);
 return ret;
 }

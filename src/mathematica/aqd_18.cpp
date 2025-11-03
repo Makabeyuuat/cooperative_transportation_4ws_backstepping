@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_aqd_18_()
 {
 double ret;
-ret = nu5;
+ret = nu(4);
 return ret;
 }
