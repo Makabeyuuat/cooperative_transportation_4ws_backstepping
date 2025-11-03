@@ -107,7 +107,7 @@ Eigen::Matrix<double,23,1> DynamicsIntegrator::computeXAlpha(
       Eigen::Matrix<double,12,1> dot_C_rb = C*r_b;
 
       //目標加速度νを計算
-      Eigen::Matrix<double,12,1> nu = -dot_C_rb + pdud;
+      nu = -dot_C_rb + pdud;
       
       
       //状態変数ベクトルの目標加速度
