@@ -89,7 +89,6 @@ Eigen::Matrix<double,23,1> DynamicsIntegrator::computeXAlpha(
       Eigen::Matrix<double,23,1> Xalpha;
       
       // 結果格納用ベクトル
-      Eigen::Matrix<double,12,1> u_act;
       u_act<<
           u1_act, u2_act, u3_act, u4_act, u5_act, u6_act, 
           u7_act, u8_act, u9_act, u10_act, u11_act, u12_act;
