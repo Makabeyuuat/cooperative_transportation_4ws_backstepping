@@ -4,6 +4,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#define GRAV 9.80665	
+#define GRVY 9.80665
 #define DIM 23
 #define Q_sample 100001  //曲線の分割数
 #define PSdist 400
@@ -315,7 +317,10 @@ inline double v3_wheel_angle_vel_FL,    v3_wheel_angle_vel_FR,    v3_wheel_angle
 inline double delta_vel1, delta_vel2, delta_vel3;
 
 
-
+//hill
+//inline double rho = 5.7 * DEG2RAD;
+//flat
+inline double rho = 0.0 * DEG2RAD;
 
 inline double m_wheel = 8;
 inline double m_hinge = 12;
@@ -323,13 +328,32 @@ inline double M_mass = 100 + 2* 12.646385127140846;
 inline double m_b = 100 + 2*12.646385127140846; //車両の質量
 inline double m_w = 2*(m_wheel + m_hinge);
 inline double m_c = 100.0;
-inline double I_theta = vehicle_inertia_coef * 418.647558 + 2*0.755318;
+inline double I_theta0 = vehicle_inertia_coef * 418.647558 + 2*0.755318;
 inline double I_wheel = wheel_inertia_coef *0.029034;
 inline double I_hinge = hinge_inertia_coef*0.021551;
 inline double I_phiF = 2*(I_wheel + I_hinge);
 inline double I_phiR = 2*(I_wheel + I_hinge);
 inline double I_varphiF = 2*(wheel_inertia_coef*0.053334);        
 inline double I_varphiR = 2*(wheel_inertia_coef*0.053334); 
+//v1
+inline double I_theta1 = vehicle_inertia_coef * 418.647558 + 2*0.755318;
+inline double I_phiF1 = 2*(I_wheel + I_hinge);
+inline double I_phiR1 = 2*(I_wheel + I_hinge);
+inline double I_varphiF1 = 2*(wheel_inertia_coef*0.053334);        
+inline double I_varphiR1 = 2*(wheel_inertia_coef*0.053334); 
+//v2
+inline double I_theta2 = vehicle_inertia_coef * 418.647558 + 2*0.755318;
+inline double I_phiF2 = 2*(I_wheel + I_hinge);
+inline double I_phiR2 = 2*(I_wheel + I_hinge);
+inline double I_varphiF2 = 2*(wheel_inertia_coef*0.053334);        
+inline double I_varphiR2 = 2*(wheel_inertia_coef*0.053334); 
+//v3
+inline double I_theta3 = vehicle_inertia_coef * 418.647558 + 2*0.755318;
+inline double I_phiF3 = 2*(I_wheel + I_hinge);
+inline double I_phiR3 = 2*(I_wheel + I_hinge);
+inline double I_varphiF3 = 2*(wheel_inertia_coef*0.053334);        
+inline double I_varphiR3 = 2*(wheel_inertia_coef*0.053334); 
+     
      
 inline double Q_phiF1 = 0.0, Q_phiR1 = 0.0, Q_varphiF1 = 0.0, Q_varphiR1 = 0.0,Q_phiF2 = 0.0,Q_phiR2 = 0.0,Q_varphiF2 = 0.0,Q_varphiR2 = 0.0, Q_phiF3 = 0.0, Q_phiR3 = 0.0, Q_varphiF3 = 0.0, Q_varphiR3 = 0.0;
 
