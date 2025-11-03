@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_aqd_10_()
 {
 double ret;
-ret = athetap7d + asd*sr.0Cs + sr.0Cs1*Power(calc_SX_1_1_()*u1_act,2);
+ret = athetap7d + asd*sr.Cs + sr.Cs1*Power(calc_SX_1_1_()*u_act(0),2);
 return ret;
 }

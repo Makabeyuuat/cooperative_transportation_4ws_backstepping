@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_Axi_18_3_()
 {
 double ret;
-ret = -2*lv*Sin(PAI/6.0 - q_map(2));
+ret = -2*lv*Sin(PAI/6. - q_map(2));
 return ret;
 }

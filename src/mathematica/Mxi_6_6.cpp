@@ -7,6 +7,6 @@
 double KinematicsSolver::calc_Mxi_6_6_()
 {
 double ret;
-ret = I_theta1 + (Power(lv,2)*m_w)/2.0;
+ret = I_theta1 + (Power(lv,2)*m_w)/2.;
 return ret;
 }
