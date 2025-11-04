@@ -132,7 +132,6 @@ extern Eigen::Map<Eigen::Matrix<double,27,1>> qddot_map;
 
 //input
 //制御入力
-inline double  w1;
 inline double a0 = 0.2;
 inline double u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12;
 //制御入力用行列
@@ -182,6 +181,18 @@ inline double b10 = 0.0;
 inline double b11 = 0.0;
 inline double b12 = 0.0;
 
+inline double w1 = a0;
+inline double w2 = 0.0;
+inline double w3 = 0.0;
+inline double w4 = 0.0;
+inline double w5 = 0.0;
+inline double w6 = 0.0;
+inline double w7 = 0.0;
+inline double w8 = 0.0;
+inline double w9 = 0.0;
+inline double w10 = 0.0;
+inline double w11 = 0.0;
+inline double w12 = 0.0;
 
 //制御入力の係数
 inline double z21, z22, z31, z32, z41, z42, z51, z52 ,z61, z62, z71, z72, z81, z82, z91, z92, z101, z102, z111, z112, z121, z122;
@@ -376,18 +387,18 @@ inline double Q_varphiFR = 0.0;
 inline double Q_varphiFL = 0.0;
 inline double Q_varphiRR = 0.0;
 inline double Q_varphiRL = 0.0;
-Eigen::Matrix<double,12,1> nu = Eigen::Matrix<double,12,1>::Zero();
-Eigen::Matrix<double,12,1> u_act = Eigen::Matrix<double,12,1>::Zero();
+inline Eigen::Matrix<double,12,1> nu ;
+inline Eigen::Matrix<double,12,1> u_act ;
 inline double u1_act = 0.0, u2_act = 0.0, u3_act = 0.0, u4_act = 0.0, u5_act = 0.0, u6_act = 0.0, u7_act = 0.0, u8_act = 0.0, u9_act = 0.0, u10_act = 0.0, u11_act = 0.0, u12_act = 0.0;
 inline double asd = 0.0;
+inline double athetap0d = 0.0;
 inline double athetap4d = 0.0;
 inline double athetap7d = 0.0;
 inline double athetap10d = 0.0;
 inline double slide1 = 0.0;
 inline double slide2 = 0.0;
 inline double slide3 = 0.0;
-inline Eigen::Vector4d lamda_data = Eigen::Vector4d::Zero();
-
+inline Eigen::Matrix<double,18,1> lambda_data ;
 // 初期値設定関数
 // 引数: t, dt, x0, x_new
 void initial(double &t, double &dt, std::vector<double> &x0, std::vector<double> &x_new, std::vector<double> &x_input);

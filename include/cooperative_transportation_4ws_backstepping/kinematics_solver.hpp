@@ -11,21 +11,18 @@ public:
   #include "generated/func.txt"
 
   // --- 27x27 系 ---
-  Eigen::Matrix<double,27,27> Cxi_mat() const;
-  Eigen::Matrix<double,27,27> Mxi_mat() const;
-  Eigen::Matrix<double,18,27> Axi_mat() const;   
+  Eigen::Matrix<double,27,27> Cxi_mat();
+  Eigen::Matrix<double,27,27> Mxi_mat();
+  Eigen::Matrix<double,18,27> Axi_mat();   
   
   // --- ベクトル系 ---
-  Eigen::Matrix<double,7,1>  Kxi_vec() const;
-  Eigen::Matrix<double,12,1>  pd_ud_vec() const;
-
-  // --- 小さめ行列 ---
-  Eigen::Matrix<double,3,5>  pd_WX_mat() const;
-  Eigen::Matrix<double,3,1>  pd_Wt_vec() const;
+  Eigen::Matrix<double,27,1>  Kxi_vec();
+  Eigen::Matrix<double,12,1>  pd_ud_vec();
+  Eigen::Matrix<double,27,1>  aqd_vec();
 
   // --- 状態・派生 ---
-  Eigen::Matrix<double,23,12> SX_mat() const;
-  Eigen::Matrix<double,23,12> dSXdt_mat() const;
+  Eigen::Matrix<double,23,12> SX_mat();
+  Eigen::Matrix<double,23,12> dSXdt_mat();
 
   inline double Cxi_rc(size_t r, size_t c) { return (this->*Cxi_tbl[r][c])(); }
   inline double Cxi(size_t i) { return (this->*Cxi_tbl[i/27][i%27])(); }

@@ -4,8 +4,8 @@
 #include "cooperative_transportation_4ws_backstepping/Bezier.h"         // Bezier 曲線の関数
 #include "cooperative_transportation_4ws_backstepping/vehicle.hpp"       // Vehicle クラスの宣言
 #include "cooperative_transportation_4ws_backstepping/callback.hpp"     // コールバック関数の宣言
-#include "cooperative_transportation_4ws_backstepping/getInputValue_dynamics.hpp"
-#include "cooperative_transportation_4ws_backstepping/differential_equations_dynamics.hpp"
+#include "cooperative_transportation_4ws_backstepping/getInputValue.hpp"
+#include "cooperative_transportation_4ws_backstepping/differential_equations.hpp"
 #include "cooperative_transportation_4ws_backstepping/kinematics_solver.hpp"
 #include <cmath>
 #include <limits>
@@ -31,8 +31,6 @@ DynamicsIntegrator::DynamicsIntegrator(double m_b,
                                        double lv,
                                        double g,
                                        double rho,
-                                       const PIDGains& drive_gains,
-                                       const PIDGains& steer_gains,
                                        double dt,
                                        std::array<getInputValue,3>& inputValues)
                                        :kinematics_solver_() ,
@@ -209,7 +207,7 @@ void DynamicsIntegrator::step(
       // COD による最小ノルム解
       Eigen::CompleteOrthogonalDecomposition<Eigen::Matrix<double,15,18>> cod(AT_xi);
       Eigen::Matrix<double,18,1> lambda = cod.solve(rhs);
-      lamda_data = lambda;
+      lambda_data = lambda;
 
 
       //駆動力の導出
@@ -263,7 +261,7 @@ void DynamicsIntegrator::step(
       v3_torque_rear[0] = inputValues_ref_[2].rearTorque[0];  // 左後輪
       v3_torque_rear[1] = inputValues_ref_[2].rearTorque[1];  // 右後輪
       v3_torque_front[0] = inputValues_ref_[2].frontTorque[0];  // 左後輪
-      v3_torque_front[1] = inputValues_ref[2]_frontTorque[1];  // 右後輪
+      v3_torque_front[1] = inputValues_ref_[2].frontTorque[1];  // 右後輪
      
 
       //積分用の配列に代入

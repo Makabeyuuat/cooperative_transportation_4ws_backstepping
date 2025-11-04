@@ -27,7 +27,6 @@ extern bool v1_rear_left_steering_pose_received;
 extern geometry_msgs::PoseStamped v1_front_left_steering_pose;
 extern bool v1_front_left_steering_pose_received;
 
-inline double delta_pos[3] = {0.0, 0.0, 0.0};
 
 // コールバック関数の宣言
 void trueBaseLinkCallback(const nav_msgs::Odometry::ConstPtr& msg);

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "kinematics_solver.hpp"
+#include "cooperative_transportation_4ws_backstepping/kinematics_solver.hpp"
 #include <Eigen/Dense>
-#include "pidTau.hpp"
 #include <vector>
-#include "cooperative_transportation_4ws_backstepping/getInputValue_dynamics.hpp"
+#include "cooperative_transportation_4ws_backstepping/getInputValue.hpp"
 
 // ========= ここから追加：4輪Ni補償 用の型 =========
 
@@ -57,15 +56,15 @@ struct NiCompTorques4 {
 class DynamicsIntegrator {
 public:
 
-    //新規メソッド: バックステッピングから得られる目標加速度を計算する
+    //新規メソッド: バックステッピングから得られる目標加速度を計算する 
     Eigen::Matrix<double,27,1> computeAlpha(
         const Eigen::Matrix<double,27,1>& q, // 状態ベクトル (x,y,θ,φ,ψ_f,ψ_r)
         const Eigen::Matrix<double,27,1>& qdot,     // 速度ベクトル         
         const Eigen::Matrix<double,12,1>& u_kinematics);
 
     Eigen::Matrix<double,23,1> computeXAlpha(
-        std::vector<double>& x_d,
-        std::vector<double>& x_dd,
+        const std::vector<double>& x_d,
+        const std::vector<double>& x_dd,
         const Eigen::Matrix<double,12,1>& u_kinematics);
 
      Eigen::Matrix<double,27,1> computeAlpha(const Eigen::Matrix<double,27,1>& q,
@@ -78,8 +77,6 @@ public:
                        double lv,
                        double g,
                        double rho,
-                       const PIDGains& drive_gains,
-                       const PIDGains& steer_gains,
                        double dt,
                        std::array<getInputValue,3>& inputValues);
 
