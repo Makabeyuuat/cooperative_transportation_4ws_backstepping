@@ -13,6 +13,8 @@
 #include <Eigen/SVD> 
 #include <Eigen/Core>   
 #include <iostream>
+#include <ros/package.h>
+#include <ros/ros.h>
 
 // ここで IOFormat を定義しておく
 static const Eigen::IOFormat CleanFmt(
@@ -26,15 +28,8 @@ static const Eigen::IOFormat CleanFmt(
 
 using namespace std;
 
-DynamicsIntegrator::DynamicsIntegrator(double m_b,
-                                       double I_theta,
-                                       double lv,
-                                       double g,
-                                       double rho,
-                                       double dt,
-                                       std::array<getInputValue,3>& inputValues)
-                                       :kinematics_solver_() ,
-                                       inputValues_ref_(inputValues)
+DynamicsIntegrator::DynamicsIntegrator(double dt)
+                                       :kinematics_solver_()
 
  {}
 
@@ -98,7 +93,7 @@ Eigen::Matrix<double,23,1> DynamicsIntegrator::computeXAlpha(
       
       //ゲイン
       Eigen::Matrix<double,12,1> gains;
-      gains << 10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0;
+      gains << 5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0;
       Eigen::Matrix<double,12,12> C = gains.asDiagonal();
           
       Eigen::Matrix<double,12,1> dot_C_rb = C*r_b;
@@ -109,6 +104,11 @@ Eigen::Matrix<double,23,1> DynamicsIntegrator::computeXAlpha(
       
       //状態変数ベクトルの目標加速度
       Xalpha = dSXdt*u_act + SX * nu;
+
+      //u_dとu_actの表示
+      ROS_INFO_THROTTLE(0.2,"u_kinematics: 1=%.3f, 2=%.3f, 3=%.3f, 4=%.3f, 5=%.3f, 6=%.3f, 7=%.3f, 8=%.3f,9=%.3f, 10=%.3f, 11=%.3f, 12=%.3f", u_kinematics(0), u_kinematics(1), u_kinematics(2), u_kinematics(3), u_kinematics(4), u_kinematics(5), u_kinematics(6), u_kinematics(7), u_kinematics(8), u_kinematics(9), u_kinematics(10), u_kinematics(11));
+	  ROS_INFO_THROTTLE(0.2,"u_act: 1=%.3f, 2=%.3f, 3=%.3f, 4=%.3f, 5=%.3f, 6=%.3f, 7=%.3f, 8=%.3f,9=%.3f, 10=%.3f, 11=%.3f, 12=%.3f", u_act(0), u_act(1), u_act(2), u_act(3), u_act(4), u_act(5), u_act(6), u_act(7), u_act(8), u_act(9), u_act(10), u_act(11));
+	  ROS_INFO_THROTTLE(0.2,"nu: 1=%.3f, 2=%.3f, 3=%.3f, 4=%.3f, 5=%.3f, 6=%.3f, 7=%.3f, 8=%.3f,9=%.3f, 10=%.3f, 11=%.3f, 12=%.3f\n", nu(0), nu(1), nu(2), nu(3), nu(4), nu(5), nu(6), nu(7), nu(8), nu(9), nu(10), nu(11));
       
       return Xalpha;
     }
@@ -126,6 +126,9 @@ Eigen::Matrix<double,27,1> DynamicsIntegrator::computeAlpha(
 
         asd = Xalpha(0);
         athetap0d = Xalpha(2);
+        athetap4d =  Xalpha(10);
+        athetap7d =  Xalpha(16);
+        athetap10d =  Xalpha(22);
 
         alpha = kinematics_solver_.aqd_vec();
 
@@ -147,56 +150,44 @@ void DynamicsIntegrator::step(
       //目標加速度の取得
       Eigen::Matrix<double,27,1> alpha = computeAlpha(q, qdot, u_kinematics);
 
+      ROS_INFO_THROTTLE(0.2,"q: 1=%.3f, 2=%.3f, 3=%.3f, 4=%.3f, 5=%.3f, 6=%.3f, 7=%.3f, 8=%.3f,9=%.3f, 10=%.3f, 11=%.3f, 12=%.3f", q_map(0), q_map(1), q_map(2), q_map(3), q_map(4), q_map(5), q_map(6), q_map(7), q_map(8), q_map(9), q_map(10), q_map(11));
+	  ROS_INFO_THROTTLE(0.2,"q: 13=%.3f, 14=%.3f, 15=%.3f, 16=%.3f, 17=%.3f, 18=%.3f, 19=%.3f, 20=%.3f,21=%.3f, 22=%.3f, 23=%.3f, 24=%.3f", q_map(12), q_map(13), q_map(14), q_map(15), q_map(16), q_map(17), q_map(18), q_map(19), q_map(20), q_map(21), q_map(22), q_map(23));
+	  ROS_INFO_THROTTLE(0.2,"q: 25=%.3f, 26=%.3f, 27=%.3f\n", q_map(24), q_map(25), q_map(26));
+      
+
       //qの目標加速度を分解
-      Eigen::Matrix<double,15,1> alpha_xi;
-      alpha_xi
-      <<
-      alpha(0), alpha(1), alpha(2), alpha(3), alpha(4), alpha(5), alpha(6), alpha(7), alpha(8), 
-      alpha(9), alpha(10), alpha(11), alpha(12), alpha(13), alpha(14);
+      constexpr int NXI = 15;
+      constexpr int NZETA = 12;
+          
+      Eigen::Matrix<double,NXI,1>  alpha_xi  = alpha.head<NXI>();
+      Eigen::Matrix<double,NZETA,1> alpha_zeta = alpha.tail<NZETA>();
+          
+      Eigen::Matrix<double,NXI,1>  qdot_xi   = qdot.head<NXI>();
+      Eigen::Matrix<double,NZETA,1> qdot_zeta  = qdot.tail<NZETA>();
 
-      Eigen::Matrix<double,12,1> alpha_zeta;
-      alpha_zeta 
-      <<
-      alpha(15), alpha(16), alpha(17), alpha(18), alpha(19), alpha(20), alpha(21), alpha(22), 
-      alpha(23), alpha(24), alpha(25), alpha(26);
-
-      //qdotを分解
-      Eigen::Matrix<double,15,1> qdot_xi;
-      qdot_xi 
-      <<
-      qdot(0), qdot(1), qdot(2), qdot(3), qdot(4), qdot(5), qdot(6), qdot(7), qdot(8), 
-      qdot(9), qdot(10), qdot(11), qdot(12), qdot(13), qdot(14);
-      Eigen::Matrix<double,12,1> qdot_zeta;
-      qdot_zeta 
-      <<
-      qdot(15), qdot(16), qdot(17), qdot(18), qdot(19), qdot(20), qdot(21), qdot(22), 
-      qdot(23), qdot(24), qdot(25), qdot(26);
 
 
       // ラムダの導出
-      constexpr int NXI   = 15;  // q_xi の次元
-      constexpr int NZETA = 12;  // q_zeta の次元
+      //慣性行列 M (27x27)
+      Eigen::Matrix<double,NXI,   NXI>   M_xixi   = M.topLeftCorner   (NXI,   NXI);  
+      Eigen::Matrix<double,NXI,   NZETA> M_xizeta = M.topRightCorner  (NXI,   NZETA);
+      Eigen::Matrix<double,NZETA, NXI>   M_zetaxi = M.bottomLeftCorner(NZETA, NXI);  
+      Eigen::Matrix<double,NZETA, NZETA> M_zetazeta = M.bottomRightCorner(NZETA, NZETA);
 
-      // 1) 慣性行列 M (27x27) のブロック分け
-      Eigen::Matrix<double,NXI,   NXI>   M_xixi   = M.topLeftCorner   (NXI,   NXI);   // M_ξξ
-      Eigen::Matrix<double,NXI,   NZETA> M_xizeta = M.topRightCorner  (NXI,   NZETA); // M_ξζ
-      Eigen::Matrix<double,NZETA, NXI>   M_zetaxi = M.bottomLeftCorner(NZETA, NXI);   // M_ζξ
-      Eigen::Matrix<double,NZETA, NZETA> M_zetazeta = M.bottomRightCorner(NZETA, NZETA); // M_ζζ
-
-      // 2) コリオリ(あるいは速度係数)行列 C (27x27) のブロック分け
+      //コリオリ行列C
       Eigen::Matrix<double,NXI,   NXI>   C_xixi   = C.topLeftCorner   (NXI,   NXI);
       Eigen::Matrix<double,NXI,   NZETA> C_xizeta = C.topRightCorner  (NXI,   NZETA);
       Eigen::Matrix<double,NZETA, NXI>   C_zetaxi = C.bottomLeftCorner(NZETA, NXI);
       Eigen::Matrix<double,NZETA, NZETA> C_zetazeta = C.bottomRightCorner(NZETA, NZETA);
 
-      // 3) 拘束行列 A (18x27) の分割（そのまま）
-      Eigen::Matrix<double,18, NXI>   A_xi   = A.leftCols (NXI);     // 18x15
-      Eigen::Matrix<double,18, NZETA> A_zeta = A.rightCols(NZETA);   // 18x12
+      //拘束行列 A 
+      Eigen::Matrix<double,18, NXI>   A_xi   = A.leftCols (NXI);   
+      Eigen::Matrix<double,18, NZETA> A_zeta = A.rightCols(NZETA); 
 
-      // 3) A を転置した版（よく使うやつ）
-      Eigen::Matrix<double,27,18> AT = A.transpose();                 // 27x18
-      Eigen::Matrix<double,NXI,   18> AT_xi   = AT.topRows(NXI);      // 15x18 … ξに対応
-      Eigen::Matrix<double,NZETA, 18> AT_zeta = AT.bottomRows(NZETA); // 12x18 … ζに対応
+      //Aを転置
+      Eigen::Matrix<double,27,18> AT = A.transpose();      
+      Eigen::Matrix<double,NXI,   18> AT_xi   = AT.topRows(NXI); 
+      Eigen::Matrix<double,NZETA, 18> AT_zeta = AT.bottomRows(NZETA);
 
       // 4) ddotq,dotqを含まない項 K (27x1) の分割
       Eigen::Matrix<double, NXI,   1> K_xi   = K.topRows   (NXI);
@@ -216,8 +207,6 @@ void DynamicsIntegrator::step(
       Eigen::Matrix<double,12,1> Q_zeta = rhs_zeta_only - AT_zeta * lambda;
 
 
-      
-     
       //駆動力計算
       Q_phiR1   = Q_zeta(0);
       Q_varphiR1 = Q_zeta(1);
@@ -235,33 +224,39 @@ void DynamicsIntegrator::step(
 
       // 3) step() の最後でそれぞれに詰める
       // 車両1
-      inputValues_ref_[0].rearTorque  = inputValues_ref_[0].computeRearWheelTorque(Q_varphiR1, q(17),  q(15));
-      inputValues_ref_[0].frontTorque = inputValues_ref_[0].computeFrontWheelTorque(Q_varphiF1, q(17), q(15));
+      std::array<double,2> v1_rearTorque;  
+      std::array<double,2> v1_frontTorque;
+      v1_rearTorque  = computeRearWheelTorque(Q_varphiR1, q(17),  q(15));
+      v1_frontTorque = computeFrontWheelTorque(Q_varphiF1, q(17), q(15));
 
       // 車両2
-      inputValues_ref_[1].rearTorque  = inputValues_ref_[1].computeRearWheelTorque(Q_varphiR2, q(21), q(19));
-      inputValues_ref_[1].frontTorque = inputValues_ref_[1].computeFrontWheelTorque(Q_varphiF2, q(21), q(19));
+      std::array<double,2> v2_rearTorque;  
+      std::array<double,2> v2_frontTorque;
+      v2_rearTorque  = computeRearWheelTorque(Q_varphiR2, q(21), q(19));
+      v2_frontTorque = computeFrontWheelTorque(Q_varphiF2, q(21), q(19));
 
       // 車両3
-      inputValues_ref_[2].rearTorque  = inputValues_ref_[2].computeRearWheelTorque(Q_varphiR3, q(25), q(23));
-      inputValues_ref_[2].frontTorque = inputValues_ref_[2].computeFrontWheelTorque(Q_varphiF3, q(25), q(23));
+      std::array<double,2> v3_rearTorque;  
+      std::array<double,2> v3_frontTorque;
+      v3_rearTorque  = computeRearWheelTorque(Q_varphiR3, q(25), q(23));
+      v3_frontTorque = computeFrontWheelTorque(Q_varphiF3, q(25), q(23));
 
 
 
-      v1_torque_rear[0] = inputValues_ref_[0].rearTorque[0];  // 左後輪
-      v1_torque_rear[1] = inputValues_ref_[0].rearTorque[1];  // 右後輪
-      v1_torque_front[0] = inputValues_ref_[0].frontTorque[0];  // 左後輪
-      v1_torque_front[1] = inputValues_ref_[0].frontTorque[1];  // 右後輪
+      v1_torque_rear[0] = v1_rearTorque[0];  // 左後輪
+      v1_torque_rear[1] = v1_rearTorque[1];  // 右後輪
+      v1_torque_front[0] = v1_frontTorque[0];  // 左後輪
+      v1_torque_front[1] = v1_frontTorque[1];  // 右後輪
 
-      v2_torque_rear[0] = inputValues_ref_[1].rearTorque[0];  // 左後輪
-      v2_torque_rear[1] = inputValues_ref_[1].rearTorque[1];  // 右後輪
-      v2_torque_front[0] = inputValues_ref_[1].frontTorque[0];  // 左後輪
-      v2_torque_front[1] = inputValues_ref_[1].frontTorque[1];  // 右後輪
+      v2_torque_rear[0] = v2_rearTorque[0];  // 左後輪
+      v2_torque_rear[1] = v2_rearTorque[1];  // 右後輪
+      v2_torque_front[0] = v2_frontTorque[0];  // 左後輪
+      v2_torque_front[1] = v2_frontTorque[1];  // 右後輪
 
-      v3_torque_rear[0] = inputValues_ref_[2].rearTorque[0];  // 左後輪
-      v3_torque_rear[1] = inputValues_ref_[2].rearTorque[1];  // 右後輪
-      v3_torque_front[0] = inputValues_ref_[2].frontTorque[0];  // 左後輪
-      v3_torque_front[1] = inputValues_ref_[2].frontTorque[1];  // 右後輪
+      v3_torque_rear[0] = v3_rearTorque[0];  // 左後輪
+      v3_torque_rear[1] = v3_rearTorque[1];  // 右後輪
+      v3_torque_front[0] = v3_frontTorque[0];  // 左後輪
+      v3_torque_front[1] = v3_frontTorque[1];  // 右後輪
      
 
       //積分用の配列に代入
@@ -273,7 +268,127 @@ void DynamicsIntegrator::step(
       x_dd[5] = 0.0;
       x_dd[6] = 0.0;
       x_dd[7] = 0.0;
-      }
+}
+
+//内輪差考慮
+array<double,2>  DynamicsIntegrator::computeRearWheelOmegas(double speed, double steeringAngle) {
+    const double W = 0.05;            // トレッド幅[m]
+    array<double,2> omegas;
+
+    if (fabs(steeringAngle) < 1e-6) {
+        double omega = speed / wheelRadius;
+        omegas[0] = omega;
+        omegas[1] = omega;
+        return omegas;
+    }
+    double absPhi = fabs(steeringAngle);
+    double R = lv / tan(absPhi);
+    double R_in  = R - W/2.0;
+    double R_out = R + W/2.0;
+    double v_in  = speed * (R_in  / R);
+    double v_out = speed * (R_out / R);
+    double omega_in  = v_in  / wheelRadius;
+    double omega_out = v_out / wheelRadius;
+
+    if (steeringAngle > 0) {
+        // 左折: 左が内輪
+        omegas[0] = omega_in;
+        omegas[1] = omega_out;
+    } else {
+        // 右折: 右が内輪
+        omegas[0] = omega_out;
+        omegas[1] = omega_in;
+    }
+    return omegas;
+}
+
+
+
+// 入力がアクスルごとのトルク Q の場合
+std::array<double,2>  DynamicsIntegrator::computeFrontWheelTorque(
+    double Qf,
+    double steeringAngleFront,
+    double steeringAngleRear)
+{
+    const double Wf = 0.8;  // 前輪トレッド幅 [m]
+    std::array<double,2> torques;
+
+    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
+    if (std::fabs(tan_diff) < 1e-9) {
+        torques[0] = Qf * 0.5;
+        torques[1] = Qf * 0.5;
+        return torques;
+    }
+
+    // 1) リアアクスル基準での回転中心半径
+    double R_rear_center = lv / tan_diff;
+
+    // 2) 前輪アクスルまで平行移動
+    double Rf_center = R_rear_center + lv;
+
+    // 3) 内輪／外輪の絶対半径
+    double Rf_abs   = std::abs(Rf_center);
+    double Rf_inner = Rf_abs - Wf/2.0;
+    double Rf_outer = Rf_abs + Wf/2.0;
+
+    // 4) 内外で逆比（パワー均等）にトルクを配分
+    double sum = Rf_inner + Rf_outer;
+    double Tin = Qf * (Rf_outer / sum);
+    double Tou = Qf * (Rf_inner / sum);
+
+    // 5) 旋回方向に応じて左右に割り当て
+    if (tan_diff > 0) {
+        // 左折：左が内輪
+        torques[0] = Tin;  // 左
+        torques[1] = Tou;  // 右
+    } else {
+        // 右折：右が内輪
+        torques[0] = Tou;  // 左
+        torques[1] = Tin;  // 右
+    }
+    return torques;
+}
+
+std::array<double,2> DynamicsIntegrator::computeRearWheelTorque(
+    double Qr,
+    double steeringAngleFront,
+    double steeringAngleRear)
+{
+    const double Wr = 0.8;  // 後輪トレッド幅 [m]
+    std::array<double,2> torques;
+
+    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
+    if (std::fabs(tan_diff) < 1e-9) {
+        torques[0] = Qr * 0.5;
+        torques[1] = Qr * 0.5;
+        return torques;
+    }
+
+    // 1) リアアクスル基準での回転中心半径
+    double Rr_center = lv / tan_diff;
+
+    // 2) 内輪／外輪の絶対半径
+    double Rr_abs   = std::abs(Rr_center);
+    double Rr_inner = Rr_abs - Wr/2.0;
+    double Rr_outer = Rr_abs + Wr/2.0;
+
+    // 3) パワー均等配分
+    double sum = Rr_inner + Rr_outer;
+    double Tin = Qr * (Rr_outer / sum);
+    double Tou = Qr * (Rr_inner / sum);
+
+    // 4) 左右アサイン
+    if (tan_diff > 0) {
+        // 左折
+        torques[0] = Tin;
+        torques[1] = Tou;
+    } else {
+        // 右折
+        torques[0] = Tou;
+        torques[1] = Tin;
+    }
+    return torques;
+}
 
 
 

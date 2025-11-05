@@ -345,10 +345,6 @@ inline double m_c = 100.0;
 inline double I_theta0 = carrier_inertia_coef * 1171.807086;
 inline double I_wheel = wheel_inertia_coef *0.029034;
 inline double I_hinge = hinge_inertia_coef*0.021551;
-inline double I_phiF = 2*(I_wheel + I_hinge);
-inline double I_phiR = 2*(I_wheel + I_hinge);
-inline double I_varphiF = 2*(wheel_inertia_coef*0.053334);        
-inline double I_varphiR = 2*(wheel_inertia_coef*0.053334); 
 //v1
 inline double I_theta1 = vehicle_inertia_coef * 418.647558 + 2*0.755318;
 inline double I_phiF1 = 2*(I_wheel + I_hinge);

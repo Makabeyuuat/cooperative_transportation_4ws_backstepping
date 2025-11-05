@@ -55,8 +55,8 @@ void DynamicsCalculator::calcXold(std::vector<double>& x_old){
 
 
      //デバッグ用ログ出力
-	ROS_INFO_THROTTLE(0.25,"DynamicsCalc:thetav2=%.3f, thetav3=%.3f, thetav5=%.3f, thetav6=%.3f, thetav8=%.3f, thetav9=%.3f",
-      thetav2, thetav3, thetav5, thetav6, thetav8, thetav9);
+	// ROS_INFO_THROTTLE(0.25,"DynamicsCalc:thetav2=%.3f, thetav3=%.3f, thetav5=%.3f, thetav6=%.3f, thetav8=%.3f, thetav9=%.3f",
+     //  thetav2, thetav3, thetav5, thetav6, thetav8, thetav9);
 
     //仮想リンクを計算
     // v1
@@ -97,29 +97,6 @@ void DynamicsCalculator::calcXold(std::vector<double>& x_old){
      //  x_old[12], x_old[13], x_old[14], x_old[15], x_old[16], x_old[17]);
 	// ROS_INFO_THROTTLE(0.1,"vehicle3: phi8=%.3f, theta8=%.3f, phi9=%.3f, theta9=%.3f, phi10=%.3f, theta10=%.3f",
      //  x_old[18], x_old[19], x_old[20], x_old[21], x_old[22], x_old[23]);
-
-//     //車両の姿勢角
-//     x_old[11] = theta4 + PAI;
-//     x_old[17] = theta7;
-//     x_old[23] = theta10;
-
-    // 仕上げ：wrap（±π）しておくと後段の tan() が安定
-//     auto wrap_pi = [](double a){ while(a<=-PAI) a+=2*PAI; while(a> PAI) a-=2*PAI; return a; };
-//     x_old[7]  = wrap_pi(x_old[7]);
-//     x_old[9]  = wrap_pi(x_old[9]);
-//     x_old[13] = wrap_pi(x_old[13]);
-//     x_old[15] = wrap_pi(x_old[15]);
-//     x_old[19] = wrap_pi(x_old[19]);
-//     x_old[21] = wrap_pi(x_old[21]);
-//     x_old[8]  = wrap_pi(x_old[8]);
-//     x_old[14] = wrap_pi(x_old[14]);
-//     x_old[20] = wrap_pi(x_old[20]);
-//     x_old[10] = wrap_pi(x_old[10]);
-//     x_old[16] = wrap_pi(x_old[16]);
-//     x_old[22] = wrap_pi(x_old[22]);
-//     x_old[11] = wrap_pi(x_old[11]);
-//     x_old[17] = wrap_pi(x_old[17]);
-//     x_old[23] = wrap_pi(x_old[23]);
 }
 
 // delta1, delta2, delta3からthetav3, thetav5, thetav7を計算する関数

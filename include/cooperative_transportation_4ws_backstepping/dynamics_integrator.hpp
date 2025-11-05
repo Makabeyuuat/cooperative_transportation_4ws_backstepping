@@ -3,6 +3,7 @@
 #include "cooperative_transportation_4ws_backstepping/kinematics_solver.hpp"
 #include <Eigen/Dense>
 #include <vector>
+#include <array>
 #include "cooperative_transportation_4ws_backstepping/getInputValue.hpp"
 
 // ========= ここから追加：4輪Ni補償 用の型 =========
@@ -72,22 +73,19 @@ public:
                                             const Eigen::Matrix<double,12,1>& u_kinematics,
                                             const Eigen::Matrix<double,27,1>& qddot);
 
-    DynamicsIntegrator(double m_b,
-                       double I_theta,
-                       double lv,
-                       double g,
-                       double rho,
-                       double dt,
-                       std::array<getInputValue,3>& inputValues);
+    DynamicsIntegrator(double dt);
 
 
     void step(const Eigen::Matrix<double,27,1>& q,
               const Eigen::Matrix<double,27,1>& qdot,
               const Eigen::Matrix<double,12,1>& u_kinematics);
 
+    std::array<double,2> computeRearWheelOmegas(double speed, double steeringAngle);
+    std::array<double,2> computeRearWheelTorque(double Qr, double steeringAngleFront, double steeringAngleRear);
+    std::array<double,2> computeFrontWheelTorque(double Qf, double steeringAngleFront, double steeringAngleRear);
+
 private:
         KinematicsSolver kinematics_solver_;
-        std::array<getInputValue,3>& inputValues_ref_;
         // ===== 追加：4輪Ni連動補償の計算メソッド =====
         NiCompTorques4 computeCompensationTorques4W(
         const WheelState4& ws,   // 各輪の角速度

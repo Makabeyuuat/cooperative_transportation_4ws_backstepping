@@ -17,8 +17,7 @@ public:
     //  */
     getInputValue(double h);
 
-    std::array<double,2> rearTorque;  
-    std::array<double,2> frontTorque;
+    
 
     // /**
     //  * @brief ルンゲ‐クッタ法による状態更新と制御入力計算を実行する
@@ -28,9 +27,7 @@ public:
     void rungeKutta(std::vector<double>& x_old, int sr_j);
     void getU(std::vector<double>& x_old, int sr_j);
     void getXInput(std::vector<double>& x_old, std::vector<double>& x_input);
-    std::array<double,2> computeRearWheelOmegas(double speed, double steeringAngle);
-    std::array<double,2> computeRearWheelTorque(double Qr, double steeringAngleFront, double steeringAngleRear);
-    std::array<double,2> computeFrontWheelTorque(double Qf, double steeringAngleFront, double steeringAngleRear);
+
 
     // 計算結果の取得用
     const std::vector<double>& getX_new() const;

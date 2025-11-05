@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <time.h>
 #include <vector>
+#include <array>
 #include <ros/package.h>
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
@@ -22,6 +23,7 @@
 #include "cooperative_transportation_4ws_backstepping/getInputValue.hpp"
 #include "cooperative_transportation_4ws_backstepping/csvLogger.hpp"	// グローバル変数のヘッダーファイル
 #include "cooperative_transportation_4ws_backstepping/wheel_kinematics.hpp"
+#include "cooperative_transportation_4ws_backstepping/dynamics_integrator.hpp"
 
 using namespace std;
 
@@ -65,8 +67,11 @@ int main(int argc, char** argv)
     DynamicsCalculator dynamics_calc;
 	getInputValue getInputValue(0.02);
 
+
+	DynamicsIntegrator integrator(0.02);
+
 	//データファイル作成
-  	std::string pkg = ros::package::getPath("cooperative_transportation_4ws_description");
+  	std::string pkg = ros::package::getPath("cooperative_transportation_4ws_backstepping");
   	std::string data_dir = pkg + "/data";
 
   	CSVLogger logger(data_dir, 100000);
@@ -138,8 +143,7 @@ int main(int argc, char** argv)
 		ROS_INFO("Waiting for getting initial pose...");
 	}
 	//デバッグ用ログ出力
-	// ROS_INFO("Locking initial pose and calling initial(): x=%.3f, y=%.3f, theta_1=%.3f",
-    //        x_old[1], x_old[2], x_old[4]);
+	ROS_INFO("Ps: x=%.3f, y=%.3f, Q=%d", sr.Psx, sr.Psy, sr.j);
 	
 
 
@@ -163,6 +167,7 @@ int main(int argc, char** argv)
     dynamics_calc.calculate(x_old, t_max, l1, l2, l3, sr.j);
 	//制御入力
 	getInputValue.getU(x_old, sr.j);
+	integrator.step(q_map, qdot_map, u_kinematics);
 	getInputValue.rungeKutta(x_old, sr.j);
 	// 各車両へ steering コマンドと車輪の回転速度コマンドを送信
 
@@ -184,10 +189,10 @@ int main(int argc, char** argv)
 	
 		dynamics_calc.calcXold(x_old);
 
-		ROS_INFO_THROTTLE(0.2,"calcX:t=%.3f, x=%.3f, y=%.3f, theta0=%.3f, phi1=%.3f, theta1=%.3f",x_old[0], x_old[1], x_old[2], x_old[3], x_old[4], x_old[5]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle1: phi2=%.3f, theta2=%.3f, phi3=%.3f, theta3=%.3f,phi4=%.3f, theta4=%.3f",x_old[6], x_old[7], x_old[8], x_old[9], x_old[10], x_old[11]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle2: phi5=%.3f, theta5=%.3f, phi6=%.3f, theta6=%.3f, phi7=%.3f, theta7=%.3f", x_old[12], x_old[13], x_old[14], x_old[15], x_old[16], x_old[17]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle3: phi8=%.3f, theta8=%.3f, phi9=%.3f, theta9=%.3f, phi10=%.3f, theta10=%.3f\n",x_old[18], x_old[19], x_old[20], x_old[21], x_old[22], x_old[23]);
+		// ROS_INFO_THROTTLE(0.2,"calcX:t=%.3f, x=%.3f, y=%.3f, theta0=%.3f, phi1=%.3f, theta1=%.3f",x_old[0], x_old[1], x_old[2], x_old[3], x_old[4], x_old[5]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle1: phi2=%.3f, theta2=%.3f, phi3=%.3f, theta3=%.3f,phi4=%.3f, theta4=%.3f",x_old[6], x_old[7], x_old[8], x_old[9], x_old[10], x_old[11]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle2: phi5=%.3f, theta5=%.3f, phi6=%.3f, theta6=%.3f, phi7=%.3f, theta7=%.3f", x_old[12], x_old[13], x_old[14], x_old[15], x_old[16], x_old[17]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle3: phi8=%.3f, theta8=%.3f, phi9=%.3f, theta9=%.3f, phi10=%.3f, theta10=%.3f\n",x_old[18], x_old[19], x_old[20], x_old[21], x_old[22], x_old[23]);
 
 		//係数aの計算(ここでx_oldも計算)
 		dynamics_calc.computeCoefficients(x_old);
@@ -201,26 +206,33 @@ int main(int argc, char** argv)
 	
 		//制御入力を計算
 		getInputValue.getU(x_old, sr.j);
+		integrator.step(q_map, qdot_map, u_kinematics);
 
-		ROS_INFO_THROTTLE(0.2,"afterGetU:t=%.3f, x=%.3f, y=%.3f, theta0=%.3f, phi1=%.3f, theta1=%.3f",x_old[0], x_old[1], x_old[2], x_old[3], x_old[4], x_old[5]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle1: phi2=%.3f, theta2=%.3f, phi3=%.3f, theta3=%.3f,phi4=%.3f, theta4=%.3f",x_old[6], x_old[7], x_old[8], x_old[9], x_old[10], x_old[11]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle2: phi5=%.3f, theta5=%.3f, phi6=%.3f, theta6=%.3f, phi7=%.3f, theta7=%.3f",x_old[12], x_old[13], x_old[14], x_old[15], x_old[16], x_old[17]);
-	    ROS_INFO_THROTTLE(0.2,"vehicle3: phi8=%.3f, theta8=%.3f, phi9=%.3f, theta9=%.3f, phi10=%.3f, theta10=%.3f\n\n",x_old[18], x_old[19], x_old[20], x_old[21], x_old[22], x_old[23]);
+		// ROS_INFO_THROTTLE(0.2,"afterGetU:t=%.3f, x=%.3f, y=%.3f, theta0=%.3f, phi1=%.3f, theta1=%.3f",x_old[0], x_old[1], x_old[2], x_old[3], x_old[4], x_old[5]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle1: phi2=%.3f, theta2=%.3f, phi3=%.3f, theta3=%.3f,phi4=%.3f, theta4=%.3f",x_old[6], x_old[7], x_old[8], x_old[9], x_old[10], x_old[11]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle2: phi5=%.3f, theta5=%.3f, phi6=%.3f, theta6=%.3f, phi7=%.3f, theta7=%.3f",x_old[12], x_old[13], x_old[14], x_old[15], x_old[16], x_old[17]);
+	    // ROS_INFO_THROTTLE(0.2,"vehicle3: phi8=%.3f, theta8=%.3f, phi9=%.3f, theta9=%.3f, phi10=%.3f, theta10=%.3f\n\n",x_old[18], x_old[19], x_old[20], x_old[21], x_old[22], x_old[23]);
 
 		
 		getInputValue.rungeKutta(x_old, sr.j);
-		//再度、車両の速度を計算
-		//dynamics_calc.computeCoefficients(x_old);
 	
 		//車輪の左右差を考慮して計算
-        vehicle1.publishSteeringCommand(v1_torque_front[1], v1_torque_front[0], v1_torque_rear[0], v1_torque_rear[0]);
-    	vehicle2.publishSteeringCommand(v2_torque_front[1], v2_torque_front[0], v2_torque_rear[0], v2_torque_rear[0]);
-    	vehicle3.publishSteeringCommand(v3_torque_front[1], v3_torque_front[0], v3_torque_rear[0], v3_torque_rear[0]);
+        vehicle1.publishSteeringCommand(v1_torque_front[1], v1_torque_front[0], v1_torque_rear[1], v1_torque_rear[0]);
+    	vehicle2.publishSteeringCommand(v2_torque_front[1], v2_torque_front[0], v2_torque_rear[1], v2_torque_rear[0]);
+    	vehicle3.publishSteeringCommand(v3_torque_front[1], v3_torque_front[0], v3_torque_rear[1], v3_torque_rear[0]);
     	vehicle1.publishWheelCommand(Q_varphiF1/2, Q_varphiF1/2, Q_varphiR1/2, Q_varphiR1/2);
     	vehicle2.publishWheelCommand(Q_varphiF2/2, Q_varphiF2/2, Q_varphiR2/2, Q_varphiR2/2);
     	vehicle3.publishWheelCommand(Q_varphiF3/2, Q_varphiF3/2, Q_varphiR3/2, Q_varphiR3/2);
 
 		//デバッグ用ログ出力
+		ROS_INFO_THROTTLE(0.2,"Ps: x=%.3f, y=%.3f, Q=%d", sr.Psx, sr.Psy, sr.j);
+	    ROS_INFO_THROTTLE(0.2,"vehicle1_ste: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f", v1_torque_front[1], v1_torque_front[0], v1_torque_rear[1], v1_torque_rear[0]);
+		ROS_INFO_THROTTLE(0.2,"vehicle1_ste: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f", v2_torque_front[1], v2_torque_front[0], v2_torque_rear[1], v2_torque_rear[0]);
+		ROS_INFO_THROTTLE(0.2,"vehicle1_ste: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f", v3_torque_front[1], v3_torque_front[0], v3_torque_rear[1], v3_torque_rear[0]);
+		ROS_INFO_THROTTLE(0.2,"vehicle1_whe: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f", Q_varphiF1/2, Q_varphiF1/2, Q_varphiR1/2, Q_varphiR1/2);
+		ROS_INFO_THROTTLE(0.2,"vehicle1_whe: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f", Q_varphiF2/2, Q_varphiF2/2, Q_varphiR2/2, Q_varphiR2/2);
+		ROS_INFO_THROTTLE(0.2,"vehicle1_whe: fl=%.3f, fr=%.3f, rl=%.3f, rr=%.3f\n\n", Q_varphiF3/2, Q_varphiF3/2, Q_varphiR3/2, Q_varphiR3/2);
+	   
 		// ROS_INFO_THROTTLE(0.1,"t+carrier:t=%.3f, x=%.3f, y=%.3f, theta0=%.3f, phi1=%.3f, theta1=%.3f",
         //    x_old[0], x_old[1], x_old[2], x_old[3], x_old[4], x_old[5]);
 

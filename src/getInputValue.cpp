@@ -22,125 +22,7 @@ getInputValue::getInputValue(double h)
 
 }
 
-//内輪差考慮
-array<double,2> getInputValue::computeRearWheelOmegas(double speed, double steeringAngle) {
-    const double W = 0.05;            // トレッド幅[m]
-    array<double,2> omegas;
 
-    if (fabs(steeringAngle) < 1e-6) {
-        double omega = speed / wheelRadius;
-        omegas[0] = omega;
-        omegas[1] = omega;
-        return omegas;
-    }
-    double absPhi = fabs(steeringAngle);
-    double R = lv / tan(absPhi);
-    double R_in  = R - W/2.0;
-    double R_out = R + W/2.0;
-    double v_in  = speed * (R_in  / R);
-    double v_out = speed * (R_out / R);
-    double omega_in  = v_in  / wheelRadius;
-    double omega_out = v_out / wheelRadius;
-
-    if (steeringAngle > 0) {
-        // 左折: 左が内輪
-        omegas[0] = omega_in;
-        omegas[1] = omega_out;
-    } else {
-        // 右折: 右が内輪
-        omegas[0] = omega_out;
-        omegas[1] = omega_in;
-    }
-    return omegas;
-}
-
-
-
-// 入力がアクスルごとのトルク Q の場合
-std::array<double,2> getInputValue::computeFrontWheelTorque(
-    double Qf,
-    double steeringAngleFront,
-    double steeringAngleRear)
-{
-    const double Wf = 0.8;  // 前輪トレッド幅 [m]
-    std::array<double,2> torques;
-
-    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
-    if (std::fabs(tan_diff) < 1e-9) {
-        torques[0] = Qf * 0.5;
-        torques[1] = Qf * 0.5;
-        return torques;
-    }
-
-    // 1) リアアクスル基準での回転中心半径
-    double R_rear_center = lv / tan_diff;
-
-    // 2) 前輪アクスルまで平行移動
-    double Rf_center = R_rear_center + lv;
-
-    // 3) 内輪／外輪の絶対半径
-    double Rf_abs   = std::abs(Rf_center);
-    double Rf_inner = Rf_abs - Wf/2.0;
-    double Rf_outer = Rf_abs + Wf/2.0;
-
-    // 4) 内外で逆比（パワー均等）にトルクを配分
-    double sum = Rf_inner + Rf_outer;
-    double Tin = Qf * (Rf_outer / sum);
-    double Tou = Qf * (Rf_inner / sum);
-
-    // 5) 旋回方向に応じて左右に割り当て
-    if (tan_diff > 0) {
-        // 左折：左が内輪
-        torques[0] = Tin;  // 左
-        torques[1] = Tou;  // 右
-    } else {
-        // 右折：右が内輪
-        torques[0] = Tou;  // 左
-        torques[1] = Tin;  // 右
-    }
-    return torques;
-}
-
-std::array<double,2> getInputValue::computeRearWheelTorque(
-    double Qr,
-    double steeringAngleFront,
-    double steeringAngleRear)
-{
-    const double Wr = 0.8;  // 後輪トレッド幅 [m]
-    std::array<double,2> torques;
-
-    double tan_diff = std::tan(steeringAngleFront) - std::tan(steeringAngleRear);
-    if (std::fabs(tan_diff) < 1e-9) {
-        torques[0] = Qr * 0.5;
-        torques[1] = Qr * 0.5;
-        return torques;
-    }
-
-    // 1) リアアクスル基準での回転中心半径
-    double Rr_center = lv / tan_diff;
-
-    // 2) 内輪／外輪の絶対半径
-    double Rr_abs   = std::abs(Rr_center);
-    double Rr_inner = Rr_abs - Wr/2.0;
-    double Rr_outer = Rr_abs + Wr/2.0;
-
-    // 3) パワー均等配分
-    double sum = Rr_inner + Rr_outer;
-    double Tin = Qr * (Rr_outer / sum);
-    double Tou = Qr * (Rr_inner / sum);
-
-    // 4) 左右アサイン
-    if (tan_diff > 0) {
-        // 左折
-        torques[0] = Tin;
-        torques[1] = Tou;
-    } else {
-        // 右折
-        torques[0] = Tou;
-        torques[1] = Tin;
-    }
-    return torques;
-}
 
 void getInputValue::rungeKutta(std::vector<double>& x_old, int sr_j) {
     int n = static_cast<int>(x_old.size());  // n = DIM+1
@@ -256,7 +138,7 @@ void getInputValue::getXInput(std::vector<double>& x_old, std::vector<double>& x
 // --- 制御入力計算用内部関数 ---
 
 void getInputValue::U1(const std::vector<double>& x_old, int sr_j) {
-	u_kinematics[1] = ((1 - sr.d * sr.Cs) / cos(Thetap0)) * w1;
+	u_kinematics[0] = ((1 - sr.d * sr.Cs) / cos(Thetap0)) * w1;
 }
 
 void getInputValue::U2(const std::vector<double>& x_old, int sr_j) {
@@ -284,7 +166,7 @@ void getInputValue::U2(const std::vector<double>& x_old, int sr_j) {
 
 	w2 = ddd0d / a0 + (k1 + k2) * ((dd0d / a0) - z21) + k1 * k2 * ((d0d / a0) - z22 / a0);
 
-	u_kinematics[2] = (1 / alpha22) * (w2 - alpha21 * u1);
+	u_kinematics[1] = (1 / alpha22) * (w2 - alpha21 * u1);
 }
 
 void getInputValue::U3(const std::vector<double>& x, int sr_j) {
@@ -308,7 +190,10 @@ void getInputValue::U3(const std::vector<double>& x, int sr_j) {
 
 	w3 = ddthetap1d / a0 + (k3 + k4) * ((dthetap1d / a0) - z31) + k3 * k4 * ((thetap1d / a0) - z32 / a0);
 
-	u_kinematics[3] = (1 / alpha33) * (w3 - (alpha31 * u1 + alpha32 * u2));
+
+	u_kinematics[2] = (1 / alpha33) * (w3 - (alpha31 * u1 + alpha32 * u2));
+
+   u3 = (1 / alpha33) * (w3 - (alpha31 * u1 + alpha32 * u2));
 }
 
 void getInputValue::U4_U5_U6(const std::vector<double>& x, int sr_j) {
@@ -1938,6 +1823,11 @@ void getInputValue::U4_U5_U6(const std::vector<double>& x, int sr_j) {
 	u4and = u4_inv_a[0][0] * b4 + u4_inv_a[0][1] * b5 + u4_inv_a[0][2] * b6;
 	u5and = u4_inv_a[1][0] * b4 + u4_inv_a[1][1] * b5 + u4_inv_a[1][2] * b6;
 	u6and = u4_inv_a[2][0] * b4 + u4_inv_a[2][1] * b5 + u4_inv_a[2][2] * b6;
+
+
+   u4 = u4and;
+	u5 = u5and;
+	u6 = u6and;
 
 
 	u_kinematics(3) = u4and;
@@ -5360,6 +5250,11 @@ void getInputValue::U7_U8_U9(const std::vector<double>& x, int sr_j) {
 	u7and = u7_inv_a[0][0] * b7 + u7_inv_a[0][1] * b8 + u7_inv_a[0][2] * b9;
 	u8and = u7_inv_a[1][0] * b7 + u7_inv_a[1][1] * b8 + u7_inv_a[1][2] * b9;
 	u9and = u7_inv_a[2][0] * b7 + u7_inv_a[2][1] * b8 + u7_inv_a[2][2] * b9;
+
+   u7 = u7and;
+	u8 = u8and;
+	u9 = u9and;
+
 
 	u_kinematics(6) = u7and;
 	u_kinematics(7) = u8and;
@@ -8968,6 +8863,11 @@ void getInputValue::U10_U11_U12(const std::vector<double>& x, int sr_j) {
 	u_kinematics(9) = u10and;
 	u_kinematics(10) = u11and;
 	u_kinematics(11) = u12and;
+
+
+	u10 = u10and;
+	u11 = u11and;
+	u12 = u12and;
 
 
    w10 = (1/ a0)*(K81*u_kinematics(9) + K82*u_kinematics(10) + K83*u_kinematics(11) + K84) + (k17 + k18) * (dthetap8d / a0 - z101) + k17 * k18 * (thetap8d / a0 - z102 / a0);
